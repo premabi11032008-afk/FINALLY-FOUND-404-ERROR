@@ -1,0 +1,8 @@
+# EcoMine AI - Features added
+- Initialized React + TypeScript app with Vite
+- Added Tailwind CSS for styling
+- Configured dependencies for charts, maps, icons, routing, animations, and utility functions
+- Added Layout components (Sidebar, TopBar) with Routing
+- Implemented Analytics Dashboard with Recharts and Leaflet (Heatmap)
+- Built Resale & Exchange form with simulated AI Decision output
+- Built Scrap & Metal Recovery page with bulk upload UI and live pricing widget
