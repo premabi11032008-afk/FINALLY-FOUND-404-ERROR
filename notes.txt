@@ -1,8 +1,64 @@
-# EcoMine AI - Features added
+# Re-Cover — AI E-Waste Intelligence Platform (formerly EcoMine AI)
+## Last updated: 2026-04-10
+
+## App Rename
+- All "EcoMine AI" references changed to "Re-Cover"
+  - Sidebar logo, AuthPage logo, index.html <title>, FuturisticWorldMap HUD text
+
+## Bug Fixes (2026-04-10 evening session)
+- Fixed TypeScript error: removed per-region SVG filter loop that referenced r.color (removed property)
+  → Replaced with a single generic glow-hot filter using SourceGraphic (auto-inherits element colour)
+- Fixed empty map when backend offline: ranked[] now has a sensible default ['North','South',...]
+  so top 2 regions glow even without the API
+- Dynamic rank-based colours: rank 0 = orange-red, rank 1 = cyan, rank 2-4 = dim slate
+  Changing months now visually reassigns which blobs glow
+- Backend must be manually started: cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000
+  (reloads new xgboost_model.pkl on each start)
+
+
+## Intelligent AI Assistant Chatbot
+- Added ChatbotBubble.tsx floating widget to the bottom right of the UI
+- Fetches from Gemini API natively using VITE_GEMINI_API_KEY from the environment
+- System prompt instructs the bot to be helpful and explain the motive of "Re-Cover" (tackling the toxic e-waste fortune)
+- Features an LLM Tool/Function Call ("scroll_to_evaluator"): If a user says "I want to clean the earth" or asks how to recycle, the language model triggers a REST function call, which makes the React frontend smoothly scroll the user directly to the action-oriented Device Evaluator section
+
+## Core Setup
 - Initialized React + TypeScript app with Vite
-- Added Tailwind CSS for styling
-- Configured dependencies for charts, maps, icons, routing, animations, and utility functions
-- Added Layout components (Sidebar, TopBar) with Routing
-- Implemented Analytics Dashboard with Recharts and Leaflet (Heatmap)
-- Built Resale & Exchange form with simulated AI Decision output
-- Built Scrap & Metal Recovery page with bulk upload UI and live pricing widget
+- Added Tailwind CSS v4 for styling
+- Configured dependencies: recharts, react-leaflet, lucide-react, react-router-dom, framer-motion
+
+## Pages & Layout
+- Layout components: Sidebar (NavLinks), TopBar (search + user info)
+- Routing via BrowserRouter: / (StoryPage), /auth, /dashboard (index + /resale + /scrap)
+- StoryPage — full-scroll storytelling landing page with interactive device evaluator
+- AuthPage — login/signup form (navigates to /dashboard on submit)
+- Dashboard — Analytics with Recharts LineChart + BarChart + FuturisticPredictionMap (Leaflet)
+- ResaleExchange — AI decision form (condition slider → recommend Resell / Refurbish / Scrap)
+- ScrapRecovery — bulk upload UI + live metal pricing table
+
+## ML Backend (FastAPI)
+- backend/main.py — FastAPI server, loads xgboost_model.pkl + realistic_dataset.csv on startup
+- GET /api/predict?month=M&year=Y — returns predictions for 5 Indian regions + top_regions[]
+- Regions: North, South, East, West, Central (India)
+- Served with uvicorn on http://127.0.0.1:8000, CORS open
+
+## ML Model Files
+- xgboost_model.pkl — trained XGBoost regressor
+- realistic_dataset.csv — historical monthly e-waste totals per region (2024-01 to 2025-12)
+- get_prediction_from_model.py — prediction function (uses lag_1/2/3 + rolling_mean_3 features)
+- ml_model_training.py — training script
+
+## Frontend: Futuristic World Map (StoryPage Hero)
+- WorldPredictionBackground.tsx — thin wrapper (pointer-events-none) used in StoryPage hero
+- FuturisticWorldMap.tsx — main SVG map component:
+    * 5 organic blob regions (West/North/Central/East/South as abstract shapes)
+    * Blobs gently overlap using mix-blend-mode: screen for glowing merge effect
+    * Fetches /api/predict dynamically — hotspots controlled by ML model output
+    * Framer Motion: ping rings + pulsing core on active regions, smooth opacity transitions
+    * Floating particles (32), SVG scan-line sweep, corner HUD brackets
+    * Month/Year selector pill (‹ Jan 2026 ›) for testing — triggers live re-fetch on change
+    * Loading indicator (···) while fetching
+
+## Dashboard Map (separate)
+- FuturisticPredictionMap.tsx — Leaflet map with CircleMarkers on India lat/lng coords
+- Mounted in Dashboard.tsx under "Global Predictive E-Waste Assessment" section

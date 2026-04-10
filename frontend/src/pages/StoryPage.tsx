@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowDown, Cpu, Trash2, ShieldAlert, TrendingUp, DollarSign } from 'lucide-react';
-import HeatMap from '../components/dashboard/HeatMap';
+import WorldPredictionBackground from '../components/WorldPredictionBackground';
 
 const StoryPage = () => {
   const [device, setDevice] = useState('Smartphone');
@@ -25,10 +25,9 @@ const StoryPage = () => {
       
       {/* Act 1: The Hook */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-           <HeatMap />
-        </div>
-        <div className="absolute top-0 left-0 w-full h-[800px] bg-gradient-to-b from-eco-darker/0 via-eco-darker/80 to-eco-darker z-10"></div>
+        {/* Live ML-powered world map: pointer-events-none, never blocks text */}
+        <WorldPredictionBackground />
+
         
         <div className="z-20 max-w-4xl mx-auto space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/30 text-red-500 text-sm font-bold tracking-widest uppercase mb-4 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
@@ -85,7 +84,7 @@ const StoryPage = () => {
       </section>
 
       {/* Act 3: The Catalyst (Interactive Evaluator) */}
-      <section className="py-32 px-4 bg-slate-900/80 border-y border-slate-800 relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <section id="evaluator" className="py-32 px-4 bg-slate-900/80 border-y border-slate-800 relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         <div className="max-w-4xl mx-auto text-center space-y-12">
           
           <div className="space-y-4">

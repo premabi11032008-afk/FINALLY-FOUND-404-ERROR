@@ -28,11 +28,35 @@ for month in df["Month"].unique():
         "Chargers": month_data["Chargers"].sum(),
     }
 
+    seasonal_boost = {
+    "North": np.random.normal(1.1, 0.1),
+    "South": np.random.normal(1.1, 0.1),
+    "East": np.random.normal(1.1, 0.1),
+    "West": np.random.normal(1.1, 0.1),
+    "Central": np.random.normal(1.1, 0.1),
+}
+
+    event = np.random.choice(["none", "festival", "discount", "supply_issue"], p=[0.6,0.2,0.1,0.1])
+    if event == "festival":
+        totals = {k: int(v * np.random.uniform(1.2, 1.5)) for k,v in totals.items()}
+
+    elif event == "discount":
+        totals["Headphones"] = int(totals["Headphones"] * 1.5)
+        totals["Chargers"] = int(totals["Chargers"] * 1.3)
+
+    elif event == "supply_issue":
+        totals["Laptops"] = int(totals["Laptops"] * 0.7)
+
+
+    np.random.shuffle(regions)
+
     for product, total in totals.items():
-        weights = np.array([region_weights[r] for r in regions])
+        weights = np.array([region_weights[r] * seasonal_boost[r] for r in regions])
+        month_factor = np.random.normal(1, 0.1)
+        weights = weights * month_factor
         
         # Add randomness
-        noise = np.random.normal(1, 0.05, size=5)
+        noise = np.random.normal(1, 0.25, size=5)
         weights = weights * noise
         
         # Normalize

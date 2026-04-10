@@ -21,7 +21,7 @@ const AuthPage = () => {
           <div className="w-12 h-12 rounded-xl bg-eco-green flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)]">
             <Leaf className="text-white w-7 h-7" />
           </div>
-          <h1 className="text-3xl font-bold tracking-wider text-white">EcoMine<span className="text-eco-light">AI</span></h1>
+          <h1 className="text-3xl font-bold tracking-wider text-white">Re-<span className="text-eco-light">Cover</span></h1>
         </div>
 
         <h2 className="text-xl text-white font-semibold mb-2 text-center">

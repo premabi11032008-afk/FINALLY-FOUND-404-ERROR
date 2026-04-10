@@ -42,7 +42,8 @@ print("MAE :", mae)
 print("RMSE:", rmse)
 
 print("Next Month Prediction ")
-print(predictions(df=df,month=3,
+for _ in range(1,13):
+    print(predictions(df=df,month=_,
                   year=2026,model=model))
 
 model_path = os.path.join(base_dir, "xgboost_model.pkl")
