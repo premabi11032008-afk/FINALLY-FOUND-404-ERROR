@@ -1,41 +1,84 @@
-import os
 import pandas as pd
+import numpy as np
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(base_dir, "synthetic_dataset.csv")
+# Load dataset
+df = pd.read_csv("synthetic_dataset.csv")
 
-data = pd.read_csv(file_path)
-regions = ["North","South","East","West","Central"]
+# Define region bias (realistic differences)
+region_weights = {
+    "North": 1.2,    # high consumption
+    "South": 1.1,
+    "East": 1.0,
+    "West": 0.95,
+    "Central": 0.85  # lower consumption
+}
 
-rows = []
+regions = list(region_weights.keys())
 
-for _, row in data.iterrows():
-    month = row["Month"]
-    a = row["Android Phone"]
-    i = row["iPhone"]
-    l = row["Laptops"]
-    h = row["Headphones"]
-    c = row["Chargers"]
-    values = [a, i, l, h, c]
-    split = []
+new_rows = []
 
-    for val in values:
-        base = val // 5
-        remainder = val % 5
-        dist = [base + (1 if x < remainder else 0) for x in range(5)]
-        split.append(dist)
+for month in df["Month"].unique():
+    month_data = df[df["Month"] == month]
 
-    for r in range(5):
-        android = split[0][r]
-        iphone = split[1][r]
-        laptops = split[2][r]
-        headphones = split[3][r]
-        chargers = split[4][r]
+    totals = {
+        "Android": month_data["Android"].sum(),
+        "iPhone": month_data["iPhone"].sum(),
+        "Laptops": month_data["Laptops"].sum(),
+        "Headphones": month_data["Headphones"].sum(),
+        "Chargers": month_data["Chargers"].sum(),
+    }
 
-        total = android + iphone + laptops + headphones + chargers
+    for product, total in totals.items():
+        weights = np.array([region_weights[r] for r in regions])
+        
+        # Add randomness
+        noise = np.random.normal(1, 0.05, size=5)
+        weights = weights * noise
+        
+        # Normalize
+        weights = weights / weights.sum()
+        
+        # Distribute
+        values = (weights * total).astype(int)
 
-        rows.append([month, regions[r], android, iphone, laptops, headphones, chargers, total])
+        # Fix rounding error
+        diff = total - values.sum()
+        for i in range(diff):
+            values[i % 5] += 1
 
-df = pd.DataFrame(rows, columns=["Month","Region","Android","iPhone","Laptops","Headphones","Chargers","Total"])
+        # Store temporarily
+        if product == "Android":
+            android = values
+        elif product == "iPhone":
+            iphone = values
+        elif product == "Laptops":
+            laptops = values
+        elif product == "Headphones":
+            headphones = values
+        elif product == "Chargers":
+            chargers = values
 
-df.to_csv("synthetic_dataset.csv")
+    # Combine into rows
+    for i, region in enumerate(regions):
+        total_val = android[i] + iphone[i] + laptops[i] + headphones[i] + chargers[i]
+
+        new_rows.append([
+            month,
+            region,
+            android[i],
+            iphone[i],
+            laptops[i],
+            headphones[i],
+            chargers[i],
+            total_val
+        ])
+
+# Create new dataframe
+new_df = pd.DataFrame(new_rows, columns=[
+    "Month","Region","Android","iPhone","Laptops","Headphones","Chargers","Total"
+])
+
+# Save
+new_df.to_csv("realistic_dataset.csv", index=False)
+
+print("✅ Realistic dataset created!")

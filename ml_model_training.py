@@ -5,10 +5,12 @@ import os
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import joblib
+
 from preprocess_dataset import preprocess_csv
+from get_prediction_from_model import predictions
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(base_dir, "synthetic_dataset.csv")
+file_path = os.path.join(base_dir, "realistic_dataset.csv")
 
 df=preprocess_csv(file_path)
 
@@ -39,33 +41,9 @@ print("📊 Evaluation Results:")
 print("MAE :", mae)
 print("RMSE:", rmse)
 
-predictions = []
-
-for region in df["Region"].unique():
-    region_df = df[df["Region"] == region].sort_values("Month")
-
-    last_3 = region_df["Total"].iloc[-3:].values
-
-    next_input = pd.DataFrame({
-        "year": [2026],
-        "month": [1],
-        "lag_1": [last_3[-1]],
-        "lag_2": [last_3[-2]],
-        "lag_3": [last_3[-3]],
-        "rolling_mean_3": [np.mean(last_3)]
-    })
-
-    pred = model.predict(next_input)[0]
-
-    predictions.append({
-        "Region": region,
-        "Predicted_Total_Next_Month": round(pred, 2)
-    })
-
-pred_df = pd.DataFrame(predictions)
-
-print("\n🔮 Next Month Predictions:")
-print(pred_df)
+print("Next Month Prediction ")
+print(predictions(df=df,month=3,
+                  year=2026,model=model))
 
 model_path = os.path.join(base_dir, "xgboost_model.pkl")
 joblib.dump(model, model_path)
