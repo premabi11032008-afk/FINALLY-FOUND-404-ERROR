@@ -1,4 +1,20 @@
-# EcoMine AI - Features added
+# Re-Cover — AI E-Waste Intelligence Platform (formerly EcoMine AI)
+## Last updated: 2026-04-10
+
+## App Rename
+- All "EcoMine AI" references changed to "Re-Cover"
+  - Sidebar logo, AuthPage logo, index.html <title>, FuturisticWorldMap HUD text
+
+## Bug Fixes (2026-04-10 evening session)
+- Fixed TypeScript error: removed per-region SVG filter loop that referenced r.color (removed property)
+  → Replaced with a single generic glow-hot filter using SourceGraphic (auto-inherits element colour)
+- Fixed empty map when backend offline: ranked[] now has a sensible default ['North','South',...]
+  so top 2 regions glow even without the API
+- Dynamic rank-based colours: rank 0 = orange-red, rank 1 = cyan, rank 2-4 = dim slate
+  Changing months now visually reassigns which blobs glow
+- Backend must be manually started: cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000
+  (reloads new xgboost_model.pkl on each start)
+
 
 ## Core Setup
 - Initialized React + TypeScript app with Vite

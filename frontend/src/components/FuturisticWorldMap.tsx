@@ -9,14 +9,14 @@ const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'
 // with slight organic distortion. They share edges so the map
 // feels like one cohesive shape, not 5 separate islands.
 // ─────────────────────────────────────────────────────────────
+// Base shape definitions — each has an id, position, label, path.
+// Colour is now determined dynamically (rank from API), not hardcoded.
 const REGIONS = [
   {
     id: 'region-1',
     apiKey: 'West',
     label: 'WEST',
-    cx: 205, cy: 268,      // label + ping center
-    color: '#06b6d4',      // cyan
-    // Large left blob — overlaps NORTH top-left and CENTRAL left edge
+    cx: 205, cy: 268,
     path: 'M 208,72 C 380,68 402,158 396,268 C 390,378 318,462 208,462 C 98,462 26,378 20,268 C 14,158 36,76 208,72 Z',
   },
   {
@@ -24,8 +24,6 @@ const REGIONS = [
     apiKey: 'North',
     label: 'NORTH',
     cx: 456, cy: 148,
-    color: '#818cf8',      // indigo / purple
-    // Wide top blob — overlaps WEST right side and EAST left side
     path: 'M 278,46 C 368,14 548,14 638,56 C 728,98 708,188 622,220 C 536,252 372,252 284,220 C 196,188 188,78 278,46 Z',
   },
   {
@@ -33,8 +31,6 @@ const REGIONS = [
     apiKey: 'Central',
     label: 'CENTRAL',
     cx: 508, cy: 322,
-    color: '#2dd4bf',      // teal
-    // Centre blob — overlaps NORTH bottom, EAST lower-left, SOUTH top
     path: 'M 352,228 C 394,180 624,178 668,234 C 712,290 712,372 650,418 C 588,464 402,464 350,418 C 298,372 310,276 352,228 Z',
   },
   {
@@ -42,8 +38,6 @@ const REGIONS = [
     apiKey: 'East',
     label: 'EAST',
     cx: 768, cy: 192,
-    color: '#f472b6',      // pink / magenta
-    // Right blob — overlaps NORTH top-right and CENTRAL right edge
     path: 'M 598,68 C 678,32 862,36 942,88 C 1022,140 1002,228 926,268 C 850,308 680,304 598,258 C 516,212 518,104 598,68 Z',
   },
   {
@@ -51,11 +45,22 @@ const REGIONS = [
     apiKey: 'South',
     label: 'SOUTH',
     cx: 762, cy: 418,
-    color: '#34d399',      // green
-    // Bottom-right blob — overlaps CENTRAL lower and EAST bottom
     path: 'M 574,358 C 620,310 882,310 938,368 C 994,426 968,494 848,512 C 728,530 600,514 562,472 C 524,430 528,406 574,358 Z',
   },
 ];
+
+// Dynamic colour palette based on rank position
+// rank 0 = highest predicted (most dangerous) → fiery red-orange
+// rank 1 = second hotspot → cyan
+// rank 2-4 = normal → dim slate-blue
+const RANK_COLORS: Record<number, string> = {
+  0: '#f97316',   // orange-red  — #1 hotspot
+  1: '#06b6d4',   // cyan        — #2 hotspot
+  2: '#475569',   // slate dim
+  3: '#334155',   // darker slate
+  4: '#1e293b',   // darkest slate
+};
+
 
 // Decorative connection lines between blob centres
 const LINES = [
@@ -84,13 +89,15 @@ interface Props {
 
 const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
   const [predictions, setPredictions] = useState<Record<string, number>>({});
-  const [hotspots, setHotspots]       = useState<string[]>(['North', 'South']);
-  const [hovered, setHovered]         = useState<string | null>(null);
-  const [loading, setLoading]         = useState(false);
+  // ranked: all 5 region keys sorted highest→lowest predicted e-waste
+  // Fallback keeps North+South lit even when backend is offline
+  const [ranked, setRanked] = useState<string[]>(['North','South','East','Central','West']);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Month/year selector for testing
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1); // 1-12
+  const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear]   = useState(now.getFullYear());
 
   const prevMonth = () => {
@@ -110,17 +117,29 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
         const res  = await fetch(`http://127.0.0.1:8000/api/predict?month=${month}&year=${year}`);
         const data = await res.json();
         const map: Record<string, number> = {};
-        (data.predictions as { region: string; predicted_total: number }[])
-          .forEach(p => { map[p.region] = p.predicted_total; });
+        const sortedPreds = (data.predictions as { region: string; predicted_total: number }[])
+          .sort((a, b) => b.predicted_total - a.predicted_total);
+        sortedPreds.forEach(p => { map[p.region] = p.predicted_total; });
         setPredictions(map);
-        setHotspots(data.top_regions as string[]);
+        setRanked(sortedPreds.map(p => p.region)); // index 0 = highest
       } catch { /* keep defaults */ }
       finally { setLoading(false); }
     };
     load();
   }, [month, year]);
 
-  const isActive  = (k: string) => (activeRegion ? activeRegion === k : hotspots.includes(k));
+  // Rank of a region (0-based, 0 = highest predicted = most dangerous)
+  const getRank  = (apiKey: string) => ranked.indexOf(apiKey);  // -1 if not loaded yet
+  const getColor = (apiKey: string) => {
+    const r = getRank(apiKey);
+    return r === -1 ? '#475569' : (RANK_COLORS[r] ?? '#1e293b');
+  };
+  // Top 2 are "active" hotspots
+  const isActive  = (apiKey: string) => {
+    if (activeRegion) return activeRegion === apiKey;
+    const r = getRank(apiKey);
+    return r === 0 || r === 1;
+  };
   const isHovered = (id: string) => hovered === id;
 
   return (
@@ -148,19 +167,15 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
         className="absolute inset-0 w-full h-full"
       >
         <defs>
-          {/* Glow filter per region colour */}
-          {REGIONS.map(r => (
-            <filter key={r.id} id={`glow-${r.id}`} x="-55%" y="-55%" width="210%" height="210%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="18" result="blur" />
-              <feFlood floodColor={r.color} floodOpacity="1" result="col" />
-              <feComposite in="col" in2="blur" operator="in" result="glow" />
-              <feMerge>
-                <feMergeNode in="glow" />
-                <feMergeNode in="glow" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          ))}
+          {/* Single bright glow — inherits element colour via SourceGraphic */}
+          <filter id="glow-hot" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
           <filter id="glow-soft" x="-25%" y="-25%" width="150%" height="150%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b" />
             <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
@@ -195,6 +210,8 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
             const active = isActive(region.apiKey);
             const hover  = isHovered(region.id);
             const total  = predictions[region.apiKey];
+            const color  = getColor(region.apiKey);  // dynamic rank-based colour
+            const rank   = getRank(region.apiKey);
 
             return (
               <motion.g
@@ -206,61 +223,61 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
                 {active && (
                   <motion.path
                     d={region.path}
-                    fill={region.color}
+                    fill={color}
                     fillOpacity={0}
-                    stroke={region.color}
+                    stroke={color}
                     strokeWidth={22}
                     strokeOpacity={0}
-                    filter={`url(#glow-${region.id})`}
+                    filter="url(#glow-hot)"
                     style={{ mixBlendMode: 'screen' }}
                     animate={{ strokeOpacity: [0.08, 0.22, 0.08] }}
                     transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
                   />
                 )}
 
-                {/* Blob fill — screen blend so overlaps look glowy */}
+                {/* Blob fill */}
                 <motion.path
                   id={region.id}
                   d={region.path}
-                  fill={region.color}
-                  stroke={region.color}
+                  fill={color}
+                  stroke={color}
                   style={{ mixBlendMode: 'screen' }}
                   filter={active
-                    ? `url(#glow-${region.id})`
+                    ? 'url(#glow-hot)'
                     : hover ? 'url(#glow-soft)' : undefined}
                   animate={{
-                    fillOpacity:   active ? 0.28 : hover ? 0.18 : 0.10,
-                    strokeOpacity: active ? 1.0  : hover ? 0.80 : 0.40,
-                    strokeWidth:   active ? 2.5  : hover ? 2.0  : 1.2,
+                    fillOpacity:   active ? 0.30 : hover ? 0.18 : 0.08,
+                    strokeOpacity: active ? 1.0  : hover ? 0.70 : 0.30,
+                    strokeWidth:   active ? 2.5  : hover ? 2.0  : 1.0,
                   }}
                   transition={{ duration: 0.5, ease: 'easeOut' }}
                 />
 
-                {/* Active — pulsing ping rings */}
+                {/* Active pulsing rings */}
                 {active && (
                   <>
                     <motion.circle cx={region.cx} cy={region.cy} r={8}
-                      fill="none" stroke={region.color} strokeWidth={2}
+                      fill="none" stroke={color} strokeWidth={2}
                       animate={{ r: [8, 52], opacity: [1, 0] }}
                       transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
                     />
                     <motion.circle cx={region.cx} cy={region.cy} r={8}
-                      fill="none" stroke={region.color} strokeWidth={1.5}
+                      fill="none" stroke={color} strokeWidth={1.5}
                       animate={{ r: [8, 52], opacity: [1, 0] }}
                       transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut', delay: 0.9 }}
                     />
                     <motion.circle cx={region.cx} cy={region.cy} r={5}
-                      fill={region.color} filter={`url(#glow-${region.id})`}
+                      fill={color} filter="url(#glow-hot)"
                       animate={{ r: [5, 9, 5] }}
                       transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
                     />
                   </>
                 )}
 
-                {/* Normal region dot */}
+                {/* Normal dot */}
                 {!active && (
                   <circle cx={region.cx} cy={region.cy} r={3.5}
-                    fill={region.color} fillOpacity={hover ? 0.9 : 0.55}
+                    fill={color} fillOpacity={hover ? 0.9 : 0.45}
                     filter="url(#glow-soft)"
                   />
                 )}
@@ -277,17 +294,16 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
                       <rect
                         x={region.cx - 70} y={region.cy + 14}
                         width={140} height={22} rx={11}
-                        fill={region.color} fillOpacity={0.18}
-                        stroke={region.color} strokeOpacity={0.75} strokeWidth={0.8}
+                        fill={color} fillOpacity={0.18}
+                        stroke={color} strokeOpacity={0.75} strokeWidth={0.8}
                       />
                       <text
                         x={region.cx} y={region.cy + 29}
-                        textAnchor="middle"
-                        fill={region.color}
+                        textAnchor="middle" fill={color}
                         fontSize={8.5} fontFamily="monospace"
                         fontWeight="bold" letterSpacing="1.2"
                       >
-                        ⚠ HOTSPOT{total !== undefined ? ` · ${Math.round(total)} MT` : ''}
+                        {rank === 0 ? '🔴' : '🟡'} #{rank + 1} HOTSPOT{total !== undefined ? ` · ${Math.round(total)} MT` : ''}
                       </text>
                     </motion.g>
                   )}
@@ -298,12 +314,12 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
                   x={region.cx}
                   y={active ? region.cy - 18 : region.cy - 11}
                   textAnchor="middle"
-                  fill={region.color}
+                  fill={color}
                   fontFamily="monospace"
                   fontWeight={active ? 'bold' : 'normal'}
                   letterSpacing="2"
                   animate={{
-                    opacity:  active ? 1 : hover ? 0.85 : 0.45,
+                    opacity:  active ? 1 : hover ? 0.75 : 0.35,
                     fontSize: active ? 10.5 : 8,
                   }}
                   transition={{ duration: 0.35 }}
@@ -343,7 +359,7 @@ const FuturisticWorldMap: React.FC<Props> = ({ activeRegion }) => {
 
         {/* ── HUD corner text ─────────────────────────────────── */}
         <text x="28" y="17" fill="#06b6d4" fontSize={7.5} fontFamily="monospace"
-          opacity={0.45} letterSpacing="1.5">ECOMINE · AI THREAT MAP</text>
+          opacity={0.45} letterSpacing="1.5">RE-COVER · AI THREAT MAP</text>
         <text x="972" y="517" fill="#06b6d4" fontSize={7.5} fontFamily="monospace"
           textAnchor="end" opacity={0.45} letterSpacing="1.5">XGBOOST · LIVE FORECAST</text>
 

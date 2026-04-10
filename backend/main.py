@@ -32,7 +32,6 @@ def load_resources():
     try:
         model_path = os.path.join(parent_dir, "xgboost_model.pkl")
         data_path = os.path.join(parent_dir, "realistic_dataset.csv")
-        
         MODEL = joblib.load(model_path)
         DATASET = pd.read_csv(data_path)
         print("Model and dataset loaded successfully.")

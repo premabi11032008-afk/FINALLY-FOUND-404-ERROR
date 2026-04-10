@@ -9,7 +9,7 @@ const Sidebar = () => {
         <div className="w-10 h-10 rounded-xl bg-eco-green flex items-center justify-center">
           <Leaf className="text-white w-6 h-6" />
         </div>
-        <h1 className="text-xl font-bold tracking-wider text-white">EcoMine<span className="text-eco-light">AI</span></h1>
+        <h1 className="text-xl font-bold tracking-wider text-white">Re-<span className="text-eco-light">Cover</span></h1>
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
