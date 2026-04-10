@@ -137,9 +137,54 @@ async def place_order(order_data: dict):
     if not phone:
         raise HTTPException(status_code=400, detail="Phone number required")
     
-    print(f"ORDER PLACED: {order_data}")
-    return {
-        "status": "success",
-        "message": "Our executive will call you shortly for verification.",
-        "account_info": "Please transfer the processing fee (₹99) to: AC: 9182374655, IFSC: RECOVER001"
-    }
+# Chat endpoint
+@app.post("/api/chat")
+async def chat_with_ai(chat_data: dict):
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+    
+    user_msg = chat_data.get("message")
+    history = chat_data.get("history", []) # List of {role, parts: [{text}]}
+    
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=GEMINI_API_KEY)
+        
+        system_instruction = """
+        You are "Re-Cover AI", an intelligent assistant for the Re-Cover platform.
+        Our mission is to combat e-waste. Every phone and laptop is a "toxic fortune".
+        If a user wants to check their device value or recycle, use the 'evaluate_device_redirect' tool.
+        Encourage users to liquidize their hardware for instant INR payouts.
+        """
+        
+        model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            system_instruction=system_instruction,
+            tools=[{
+                "function_declarations": [{
+                    "name": "evaluate_device_redirect",
+                    "description": "Guides the user to the device evaluation page when they want to check their phone/laptop value or recycle."
+                }]
+            }]
+        )
+        
+        # Format history for Gemini SDK
+        # Gemini expects 'user' and 'model' (not 'assistant')
+        chat = model.start_chat(history=history)
+        response = chat.send_message(user_msg)
+        
+        # Check for function calls
+        res_data = {"text": response.text, "redirect": False}
+        
+        # If there's a function call, we signal the frontend to redirect
+        for part in response.candidates[0].content.parts:
+            if part.function_call:
+                if part.function_call.name == "evaluate_device_redirect":
+                    res_data["redirect"] = True
+                    res_data["text"] = "I am redirecting you to our AI Assessment Matrix right now! You can upload your photos there to get an instant payout."
+        
+        return res_data
+
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
