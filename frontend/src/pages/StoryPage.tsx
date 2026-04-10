@@ -84,7 +84,7 @@ const StoryPage = () => {
       </section>
 
       {/* Act 3: The Catalyst (Interactive Evaluator) */}
-      <section className="py-32 px-4 bg-slate-900/80 border-y border-slate-800 relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <section id="evaluator" className="py-32 px-4 bg-slate-900/80 border-y border-slate-800 relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         <div className="max-w-4xl mx-auto text-center space-y-12">
           
           <div className="space-y-4">

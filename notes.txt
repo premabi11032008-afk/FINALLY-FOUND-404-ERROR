@@ -16,6 +16,12 @@
   (reloads new xgboost_model.pkl on each start)
 
 
+## Intelligent AI Assistant Chatbot
+- Added ChatbotBubble.tsx floating widget to the bottom right of the UI
+- Fetches from Gemini API natively using VITE_GEMINI_API_KEY from the environment
+- System prompt instructs the bot to be helpful and explain the motive of "Re-Cover" (tackling the toxic e-waste fortune)
+- Features an LLM Tool/Function Call ("scroll_to_evaluator"): If a user says "I want to clean the earth" or asks how to recycle, the language model triggers a REST function call, which makes the React frontend smoothly scroll the user directly to the action-oriented Device Evaluator section
+
 ## Core Setup
 - Initialized React + TypeScript app with Vite
 - Added Tailwind CSS v4 for styling
