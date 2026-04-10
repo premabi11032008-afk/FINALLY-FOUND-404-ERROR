@@ -33,8 +33,8 @@
 - StoryPage — full-scroll storytelling landing page with interactive device evaluator
 - AuthPage — login/signup form (navigates to /dashboard on submit)
 - Dashboard — Analytics with Recharts LineChart + BarChart + FuturisticPredictionMap (Leaflet)
-- ResaleExchange — AI decision form (condition slider → recommend Resell / Refurbish / Scrap)
-- ScrapRecovery — bulk upload UI + live metal pricing table
+- ResaleExchange — AI decision form (YOLO Image Upload → Payout Valuation up to ₹80,000 → Phone Verification → Order Placement)
+- Scrap Recovery — bulk upload UI + live metal pricing table
 
 ## ML Backend (FastAPI)
 - backend/main.py — FastAPI server, loads xgboost_model.pkl + realistic_dataset.csv on startup
@@ -59,6 +59,15 @@
     * Month/Year selector pill (‹ Jan 2026 ›) for testing — triggers live re-fetch on change
     * Loading indicator (···) while fetching
 
-## Dashboard Map (separate)
-- FuturisticPredictionMap.tsx — Leaflet map with CircleMarkers on India lat/lng coords
 - Mounted in Dashboard.tsx under "Global Predictive E-Waste Assessment" section
+
+## YOLO Damage & Valuation (New)
+- yolo_detection.py — refactored into modular `analyze_image` and `get_valuation` functions
+- Uses Canny edge detection on YOLO-cropped device objects to quantify damage %
+- Pricing Model: Dynamic valuation up to ₹80,000 based on detected condition rating (1-10)
+- Backend:
+    * POST /api/evaluate — Accepts image upload, returns damage metrics and INR valuation
+    * POST /api/order — Captures phone number and returns payment/executive coordination details
+- Frontend:
+    * Integrated real image upload preview
+    * Multi-step order flow: AI Analysis → Accept Valuation → Phone Verification → Success Confirmation

@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
-import { ArrowDown, Cpu, Trash2, ShieldAlert, TrendingUp, DollarSign } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowDown, Cpu, Trash2, ShieldAlert, TrendingUp, DollarSign, Upload, RefreshCcw, CheckCircle } from 'lucide-react';
 import WorldPredictionBackground from '../components/WorldPredictionBackground';
 
 const StoryPage = () => {
+  const navigate = useNavigate();
   const [device, setDevice] = useState('Smartphone');
   const [condition, setCondition] = useState(50);
   const [showResult, setShowResult] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [yoloResult, setYoloResult] = useState<any>(null);
+  
+  // New interaction states
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [isFinalized, setIsFinalized] = useState(false);
 
   // Simulated calculation
   const getEarning = () => {
@@ -94,77 +105,61 @@ const StoryPage = () => {
             <p className="text-xl text-slate-400">Extract your payout in 3 seconds.</p>
           </div>
 
-          <div className="glass p-8 md:p-12 rounded-[2rem] text-left border border-slate-700">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Main CTA Section */}
+          <div className="relative group p-1">
+            <div className="absolute -inset-1 bg-gradient-to-r from-eco-green/50 to-blue-500/50 rounded-[40px] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+            <div className="relative bg-slate-900 border border-slate-800 rounded-[40px] p-12 text-center overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-eco-green/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -ml-32 -mb-32"></div>
               
-              <div className="space-y-8">
-                <div>
-                  <label className="block text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-800 pb-2">I am holding a...</label>
-                  <div className="flex gap-4">
-                    <button 
-                      onClick={() => { setDevice('Smartphone'); setShowResult(false); }}
-                      className={`flex-1 py-4 rounded-xl border-2 font-black transition-all ${device === 'Smartphone' ? 'border-eco-green bg-eco-green/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-slate-700 text-slate-400 hover:border-slate-500 bg-slate-800/50'}`}
-                    >
-                      PHONE
-                    </button>
-                    <button 
-                      onClick={() => { setDevice('Laptop'); setShowResult(false); }}
-                      className={`flex-1 py-4 rounded-xl border-2 font-black transition-all ${device === 'Laptop' ? 'border-eco-green bg-eco-green/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-slate-700 text-slate-400 hover:border-slate-500 bg-slate-800/50'}`}
-                    >
-                      LAPTOP
-                    </button>
-                  </div>
+              <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-eco-green/10 border border-eco-green/20 rounded-full mb-4">
+                  <ShieldAlert className="w-4 h-4 text-eco-green" />
+                  <span className="text-eco-green text-xs font-black uppercase tracking-widest">Global Recovery Network 2.0</span>
+                </div>
+                
+                <h3 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none mb-6">
+                  Liquidate your hardware <br/> 
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-eco-green to-blue-400">with absolute confidence.</span>
+                </h3>
+                
+                <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed">
+                  Our YOLO-powered AI matrix assesses your old electronics in seconds, offering premium payouts that directly fuel the global transition to a circular economy.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+                  <button 
+                    onClick={() => navigate('/dashboard/resale')}
+                    className="px-10 py-5 bg-white hover:bg-slate-200 text-slate-900 font-black text-xl rounded-2xl transition-all hover:scale-[1.05] active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2"
+                  >
+                    EVALUATE YOUR DEVICE <TrendingUp className="w-6 h-6" />
+                  </button>
+                  
+                  <button 
+                    onClick={() => navigate('/dashboard/contribution')}
+                    className="px-10 py-5 bg-slate-800 border-2 border-slate-700 hover:border-eco-green/50 text-white font-black text-xl rounded-2xl transition-all hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    BECOME A PARTNER <Cpu className="w-6 h-6" />
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-800 pb-2 flex justify-between items-end">
-                    <span>It looks like...</span>
-                    <span className={`text-lg font-black ${condition > 80 ? 'text-eco-light' : condition > 40 ? 'text-yellow-500' : 'text-red-500'}`}>
-                      {condition > 80 ? 'FLAWLESS' : condition > 40 ? 'BEATEN BUT BREATHING' : 'SHATTERED & DEAD'}
-                    </span>
-                  </label>
-                  <input 
-                    type="range" min="0" max="100" 
-                    value={condition} 
-                    onChange={(e) => { setCondition(parseInt(e.target.value)); setShowResult(false); }}
-                    className="w-full h-4 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-eco-green border border-slate-700" 
-                  />
-                  <div className="flex justify-between text-xs font-bold text-slate-600 mt-3 uppercase tracking-wider">
-                    <span>Obliterated</span>
-                    <span>Pristine</span>
-                  </div>
+                <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-center gap-8 text-slate-500 font-bold uppercase tracking-widest text-xs">
+                  <div className="flex items-center gap-2"><DollarSign className="w-4 h-4"/> Instant INR Payouts</div>
+                  <div className="flex items-center gap-2"><Cpu className="w-4 h-4"/> AI Verified Logic</div>
+                  <div className="flex items-center gap-2"><ArrowDown className="w-4 h-4"/> Certified Recycling</div>
                 </div>
 
-                <button 
-                  onClick={() => setShowResult(true)}
-                  className="w-full bg-white hover:bg-slate-200 text-slate-900 font-black text-xl py-5 rounded-xl transition-transform hover:scale-[1.02] active:scale-95 shadow-2xl"
-                >
-                  EXTRACT VALUE NOW
-                </button>
-              </div>
-
-              <div className="h-full">
-                {showResult ? (
-                  <div className="h-full flex flex-col justify-center bg-eco-green/10 border-2 border-eco-green shadow-[0_0_30px_rgba(16,185,129,0.2)] rounded-3xl p-8 animate-in fade-in zoom-in duration-500 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full z-0 pointer-events-none"></div>
-                    <div className="relative z-10">
-                      <p className="text-white font-black uppercase tracking-widest text-sm mb-2 opacity-80">Immediate Cashout</p>
-                      <h4 className="text-6xl font-black text-white mb-6 tracking-tighter drop-shadow-lg">{getEarning()}</h4>
-                      <div className="h-px w-full bg-eco-green/30 mb-6"></div>
-                      <p className="text-slate-300 text-lg font-medium leading-relaxed mb-10">
-                        Cash in your pocket today. More importantly? You just <strong className="text-eco-light font-bold">{getImpact()}</strong>.
-                      </p>
-                      <button className="w-full bg-eco-green hover:bg-eco-light text-slate-900 font-black text-xl py-5 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_rgba(16,185,129,0.8)] hover:-translate-y-1">
-                        CLAIM IT & SAVE THE WORLD
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col justify-center items-center text-slate-600 border-2 border-dashed border-slate-700 rounded-3xl p-8 bg-slate-900/50 min-h-[350px]">
-                    <Trash2 className="w-20 h-20 mb-6 opacity-40 animate-pulse" />
-                    <p className="text-center font-bold text-lg max-w-[200px]">Hit Extract to run the valuation matrix.</p>
-                  </div>
-                )}
+                <div className="pt-4">
+                  <p className="text-slate-500 text-sm">
+                    Want to contribute to the global recovery network? 
+                    <button 
+                      onClick={() => navigate('/dashboard/contribution')}
+                      className="text-eco-green hover:text-eco-light ml-2 underline decoration-eco-green/30 underline-offset-4 font-bold transition-colors cursor-pointer"
+                    >
+                      Learn how you can join us here.
+                    </button>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
