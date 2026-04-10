@@ -6,3 +6,5 @@
 - Implemented Analytics Dashboard with Recharts and Leaflet (Heatmap)
 - Built Resale & Exchange form with simulated AI Decision output
 - Built Scrap & Metal Recovery page with bulk upload UI and live pricing widget
+- Created FastAPI backend to expose XGBoost ML model predictions via /api/predict
+- Integrated FuturisticPredictionMap in the frontend Dashboard with neon styling for hotspots

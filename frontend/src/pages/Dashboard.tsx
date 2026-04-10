@@ -3,7 +3,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend 
 } from 'recharts';
 import { Activity, Coins, Server, TrendingUp } from 'lucide-react';
-import HeatMap from '../components/dashboard/HeatMap';
+import FuturisticPredictionMap from '../components/dashboard/FuturisticPredictionMap';
 
 const lineData = [
   { year: '2019', generation: 2100 },
@@ -101,9 +101,13 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="glass p-6 rounded-2xl mt-6">
-        <h3 className="text-lg font-semibold text-white mb-6">E-Waste Hotspots (India)</h3>
-        <HeatMap />
+      <div className="glass p-6 rounded-2xl mt-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[100px] pointer-events-none"></div>
+        <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+          <Activity className="text-cyan-400 w-5 h-5" /> 
+          Global Predictive E-Waste Assessment
+        </h3>
+        <FuturisticPredictionMap />
       </div>
     </div>
   );
