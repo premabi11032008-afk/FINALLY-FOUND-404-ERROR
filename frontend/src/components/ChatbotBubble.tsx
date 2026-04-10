@@ -107,7 +107,7 @@ const ChatbotBubble: React.FC = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={\`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)] bg-eco-green hover:bg-eco-light text-slate-900 transition-transform hover:scale-110 \${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}\`\}
+        className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)] bg-eco-green hover:bg-eco-light text-slate-900 transition-transform hover:scale-110 ${isOpen ? 'scale-0 opacity-0 pointer-events-none' : 'scale-100 opacity-100'}`}
       >
         <MessageSquare size={28} className="animate-pulse" />
       </button>
@@ -141,11 +141,11 @@ const ChatbotBubble: React.FC = () => {
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((m, i) => (
-                <div key={i} className={\`flex gap-3 \${m.role === 'user' ? 'flex-row-reverse' : ''}\`\}>
-                  <div className={\`w-8 h-8 flex items-center justify-center rounded-full shrink-0 \${m.role === 'user' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-eco-green/20 text-eco-green'}\`\}>
+                <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`w-8 h-8 flex items-center justify-center rounded-full shrink-0 ${m.role === 'user' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-eco-green/20 text-eco-green'}`}>
                     {m.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                   </div>
-                  <div className={\`p-3 rounded-2xl max-w-[80%] text-sm leading-relaxed \${m.role === 'user' ? 'bg-cyan-600 outline outline-1 outline-cyan-500 text-white rounded-tr-none' : 'bg-slate-800 outline outline-1 outline-slate-700 text-slate-200 rounded-tl-none'}\`\}>
+                  <div className={`p-3 rounded-2xl max-w-[80%] text-sm leading-relaxed ${m.role === 'user' ? 'bg-cyan-600 outline outline-1 outline-cyan-500 text-white rounded-tr-none' : 'bg-slate-800 outline outline-1 outline-slate-700 text-slate-200 rounded-tl-none'}`}>
                     {m.text}
                   </div>
                 </div>
