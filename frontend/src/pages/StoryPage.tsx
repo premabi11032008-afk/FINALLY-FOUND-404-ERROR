@@ -20,6 +20,30 @@ const StoryPage = () => {
   const [phone, setPhone] = useState('');
   const [isFinalized, setIsFinalized] = useState(false);
 
+  // Forecast states
+  const [forecastDevice, setForecastDevice] = useState<'Smartphone' | 'Laptop' | 'Desktop' | 'Server'>('Smartphone');
+  const [forecastYear, setForecastYear] = useState(2024);
+
+  const getForecastEmissions = () => {
+    const base = {
+        'Smartphone': { C: 12, CO: 2.4, O: 0.5, CO2: 45 },
+        'Laptop': { C: 45, CO: 8.2, O: 1.8, CO2: 120 },
+        'Desktop': { C: 110, CO: 18.5, O: 4.2, CO2: 350 },
+        'Server': { C: 450, CO: 85.0, O: 18.4, CO2: 1200 },
+    }[forecastDevice];
+
+    const yearDiff = forecastYear - 2024;
+    const multiplier = 1 + (yearDiff * 0.15); // Cumulative leakage per year dumped
+
+    return {
+        C: (base.C * multiplier).toFixed(1),
+        CO: (base.CO * multiplier).toFixed(1),
+        O: (base.O * multiplier).toFixed(2),
+        CO2: (base.CO2 * multiplier).toFixed(1)
+    };
+  };
+  const deviceEmissions = getForecastEmissions();
+
   // Simulated calculation
   const getEarning = () => {
     const base = device === 'Servers' ? 120000 : 45000;
@@ -167,53 +191,153 @@ const StoryPage = () => {
         </div >
       </section >
 
-  {/* Act 4: Scale (Business / Scrap UI minimized) */ }
-  < section className = "py-32 px-4 relative z-20" >
+  {/* Act 4: Emissions Tracking Matrix */}
+  <section className="py-32 px-4 relative z-20 bg-slate-900/50 border-y border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.3)] backdrop-blur-sm">
     <div className="max-w-6xl mx-auto">
-      <div className="flex flex-col lg:flex-row gap-16 items-center">
+      <div className="text-center mb-20 space-y-4">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-4">
+          <ShieldAlert className="w-4 h-4 text-blue-400" />
+          <span className="text-blue-400 text-xs font-black uppercase tracking-widest">Global Emissions Tracking Matrix</span>
+        </div>
+        <h2 className="text-5xl font-black text-white tracking-tight leading-tight">Environmental Impact <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Monitored</span>.</h2>
+        <p className="text-xl text-slate-400 font-light max-w-3xl mx-auto">
+          Real-time measurement of toxic greenhouse gases and particulate emissions neutralized via our global e-waste recovery efforts.
+        </p>
+      </div>
 
-        <div className="flex-1 space-y-8">
-          <h2 className="text-5xl font-black text-white tracking-tight leading-tight">Corporate IT Graveyard?</h2>
-          <p className="text-2xl text-slate-300 leading-relaxed font-light">
-            Servers gathering dust? We don't do "junk removal". We execute military-grade data destruction and extract massive enterprise-level liquidity from your dead infrastructure.
-          </p>
-          <div className="pt-4">
-            <button className="flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-10 py-5 rounded-2xl font-black text-lg border border-slate-600 transition-colors shadow-xl group">
-              <TrendingUp className="w-6 h-6 text-eco-green group-hover:scale-110 transition-transform" /> COMMAND BULK LIQUIDATION
-            </button>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        {/* Metric 1 */}
+        <div className="glass p-8 rounded-3xl border border-slate-700/50 hover:border-blue-500/50 transition-colors relative overflow-hidden group shadow-xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-[50px] group-hover:bg-blue-500/20 transition-all"></div>
+          <h3 className="text-5xl font-black text-white mb-2">1.2M</h3>
+          <p className="text-lg font-bold text-slate-300 mb-6">Tons Prevented</p>
+          <div className="h-px bg-slate-800 w-full mb-6"></div>
+          <p className="text-sm font-black text-blue-400 uppercase tracking-widest">CO₂ (Carbon Dioxide)</p>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Massive atmospheric blanketing halted by recycling heavy enterprise tech batteries.</p>
         </div>
 
-        <div className="flex-1 w-full glass rounded-3xl overflow-hidden border-2 border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-          <div className="bg-slate-900 p-6 border-b border-slate-800 flex justify-between items-center">
-            <span className="font-black text-white text-sm uppercase tracking-widest">B2B Live Commodities</span>
-            <span className="flex items-center gap-2 text-xs text-eco-darker px-3 py-1.5 bg-eco-green rounded-full font-black uppercase tracking-wider animate-pulse">
-              <DollarSign className="w-3 h-3" /> Trading Live
-            </span>
-          </div>
-          <div className="p-0 bg-slate-900/50">
-            <table className="w-full text-left text-lg">
-              <tbody>
-                <tr className="border-b border-slate-800 hover:bg-slate-800/80 transition-colors">
-                  <td className="py-6 px-8 text-slate-300 font-bold">Grade A Servers</td>
-                  <td className="py-6 px-8 text-right text-eco-light font-black tracking-tight">₹1.2 Lakhs / ton</td>
-                </tr>
-                <tr className="border-b border-slate-800 hover:bg-slate-800/80 transition-colors">
-                  <td className="py-6 px-8 text-slate-300 font-bold">Industrial Board Mix</td>
-                  <td className="py-6 px-8 text-right text-white font-black tracking-tight">₹45,000 / ton</td>
-                </tr>
-                <tr className="hover:bg-slate-800/80 transition-colors">
-                  <td className="py-6 px-8 text-slate-300 font-bold">Raw Li-ion Banks</td>
-                  <td className="py-6 px-8 text-right text-white font-black tracking-tight">₹22,000 / ton</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        {/* Metric 2 */}
+        <div className="glass p-8 rounded-3xl border border-slate-700/50 hover:border-red-500/50 transition-colors relative overflow-hidden group shadow-xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-[50px] group-hover:bg-red-500/20 transition-all"></div>
+          <h3 className="text-5xl font-black text-white mb-2">48k</h3>
+          <p className="text-lg font-bold text-slate-300 mb-6">Liters Mitigated</p>
+          <div className="h-px bg-slate-800 w-full mb-6"></div>
+          <p className="text-sm font-black text-red-400 uppercase tracking-widest">CO (Carbon Monoxide)</p>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Lethal burning byproducts cancelled out from informal recycling sectors.</p>
+        </div>
+
+        {/* Metric 3 */}
+        <div className="glass p-8 rounded-3xl border border-slate-700/50 hover:border-slate-400/50 transition-colors relative overflow-hidden group shadow-xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-slate-400/10 rounded-full blur-[50px] group-hover:bg-slate-400/20 transition-all"></div>
+          <h3 className="text-5xl font-black text-white mb-2">8.4k</h3>
+          <p className="text-lg font-bold text-slate-300 mb-6">Tons Captured</p>
+          <div className="h-px bg-slate-800 w-full mb-6"></div>
+          <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Carbon Particulates</p>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Black carbon PM2.5 dust locked down from incinerated motherboards.</p>
+        </div>
+
+        {/* Metric 4 */}
+        <div className="glass p-8 rounded-3xl border border-slate-700/50 hover:border-cyan-400/50 transition-colors relative overflow-hidden group shadow-xl">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-400/10 rounded-full blur-[50px] group-hover:bg-cyan-400/20 transition-all"></div>
+          <h3 className="text-5xl font-black text-white mb-2">14%</h3>
+          <p className="text-lg font-bold text-slate-300 mb-6">Depletion Halt</p>
+          <div className="h-px bg-slate-800 w-full mb-6"></div>
+          <p className="text-sm font-black text-cyan-400 uppercase tracking-widest">O / CFC Emissions</p>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Ozone-depleting refrigerants and gases neutralized from old hardware cooling units.</p>
         </div>
 
       </div>
+
+      {/* Device-Specific Emissions Terminal */}
+      <div className="mt-16 glass p-8 rounded-[2.5rem] border border-eco-green/30 relative shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden group">
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-eco-green/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-eco-green/20 transition-all duration-700"></div>
+        
+        <div className="relative z-10 text-center mb-10">
+            <h3 className="text-3xl lg:text-4xl font-black text-white tracking-tight mb-4">Device-Level Emissions Forecaster</h3>
+            <p className="text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed text-sm">
+              Calculate projected cumulative toxin release for individual hardware configurations left untreated from 2024 onwards. Focuses on core hazardous outputs.
+            </p>
+        </div>
+
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-slate-900/60 p-6 lg:p-8 rounded-[2rem] border border-slate-700/50">
+           
+           {/* Controls */}
+           <div className="lg:col-span-6 space-y-10">
+             <div>
+               <label className="block text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">Select Hardware Class</label>
+               <div className="grid grid-cols-2 gap-3">
+                 {['Smartphone', 'Laptop', 'Desktop', 'Server'].map((dev) => (
+                   <button 
+                     key={dev}
+                     onClick={() => setForecastDevice(dev as any)}
+                     className={`py-4 px-4 rounded-xl font-bold transition-all border-2 text-sm uppercase tracking-wide ${forecastDevice === dev ? 'bg-eco-green/10 text-white border-eco-green shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-white'}`}
+                   >
+                     {dev}
+                   </button>
+                 ))}
+               </div>
+             </div>
+
+             <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800">
+               <label className="flex justify-between items-end text-sm font-bold text-slate-400 mb-6 uppercase tracking-widest">
+                 <span>Projection Year</span>
+                 <span className="text-3xl font-black text-eco-green">{forecastYear}</span>
+               </label>
+               <input 
+                 type="range" min="2024" max="2034" step="1" 
+                 value={forecastYear} 
+                 onChange={(e) => setForecastYear(parseInt(e.target.value))}
+                 className="w-full h-3 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-eco-green border border-slate-700" 
+               />
+               <div className="flex justify-between text-xs font-bold text-slate-500 mt-4">
+                 <span>2024 Base</span>
+                 <span>2034 Projected</span>
+               </div>
+             </div>
+           </div>
+
+           {/* Results Output Console */}
+           <div className="lg:col-span-6 bg-black/40 rounded-3xl border border-slate-800 p-8 font-mono relative overflow-hidden shadow-inner h-full flex flex-col justify-center">
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
+               <Cpu className="w-64 h-64 text-eco-green animate-pulse" />
+             </div>
+             
+             <div className="relative z-10 flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+               <p className="text-eco-green font-bold text-sm uppercase tracking-widest flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-eco-green animate-pulse shadow-[0_0_8px_rgba(16,185,129,1)]"></span> DIAGNOSTIC OUTPUT
+               </p>
+               <span className="text-xs text-slate-500">VALUES IN GRAMS/UNIT</span>
+             </div>
+             
+             <div className="space-y-4 relative z-10">
+               <div className="flex justify-between items-center bg-slate-900/80 p-4 rounded-xl border-l-4 border-slate-400 hover:bg-slate-800 transition-colors">
+                 <span className="text-slate-400 font-bold uppercase text-xs tracking-widest">Carbon (C)</span>
+                 <span className="text-white font-black text-2xl">{deviceEmissions.C}</span>
+               </div>
+               
+               <div className="flex justify-between items-center bg-slate-900/80 p-4 rounded-xl border-l-4 border-red-500 hover:bg-slate-800 transition-colors">
+                 <span className="text-red-400 font-bold uppercase text-xs tracking-widest">Carbon Monoxide (CO)</span>
+                 <span className="text-white font-black text-2xl">{deviceEmissions.CO}</span>
+               </div>
+
+               <div className="flex justify-between items-center bg-slate-900/80 p-4 rounded-xl border-l-4 border-blue-400 hover:bg-slate-800 transition-colors">
+                 <span className="text-blue-400 font-bold uppercase text-xs tracking-widest">Oxygen (O)</span>
+                 <span className="text-white font-black text-2xl">{deviceEmissions.O}</span>
+               </div>
+
+               <div className="flex justify-between items-center bg-slate-900/80 p-4 rounded-xl border-l-4 border-cyan-400 hover:bg-slate-800 transition-colors">
+                 <span className="text-cyan-400 font-bold uppercase text-xs tracking-widest">Carbon Dioxide (CO₂)</span>
+                 <span className="text-white font-black text-2xl">{deviceEmissions.CO2}</span>
+               </div>
+             </div>
+             <p className="text-center text-[10px] text-slate-500 font-sans mt-8 bg-slate-900/50 py-2 rounded-lg">* Multiplier calculated via legacy degradation index</p>
+           </div>
+
+        </div>
+      </div>
     </div>
-      </section >
+  </section>
 
   {/* Footer CTA */ }
   < footer className = "py-32 px-4 bg-eco-green text-slate-900 text-center relative z-20 border-t-8 border-eco-light" >
