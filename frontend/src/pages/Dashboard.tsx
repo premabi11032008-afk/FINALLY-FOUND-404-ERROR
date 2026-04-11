@@ -1,113 +1,278 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend 
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell 
 } from 'recharts';
-import { Activity, Coins, Server, TrendingUp } from 'lucide-react';
+import { Activity, Coins, Server, TrendingUp, RefreshCcw, Box, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import FuturisticPredictionMap from '../components/dashboard/FuturisticPredictionMap';
 
-const lineData = [
-  { year: '2019', generation: 2100 },
-  { year: '2020', generation: 2400 },
-  { year: '2021', generation: 2800 },
-  { year: '2022', generation: 3200 },
-  { year: '2023', generation: 3800 },
-  { year: '2024', generation: 4500 },
-];
-
-const barData = [
-  { name: 'Smartphones', resold: 4000, recycled: 2400 },
-  { name: 'Laptops', resold: 3000, recycled: 1398 },
-  { name: 'Tablets', resold: 2000, recycled: 9800 },
-  { name: 'Desktop/TV', resold: 2780, recycled: 3908 },
-];
-
-const MetricCard = ({ title, value, subtext, icon: Icon, trend }: any) => (
-  <div className="glass p-6 rounded-2xl flex flex-col justify-between hover:border-eco-green/40 transition-all">
-    <div className="flex justify-between items-start mb-4">
+const MetricCard = ({ title, value, subtext, icon: Icon, trend, index }: any) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: index * 0.1 }}
+    className="glass p-6 rounded-2xl flex flex-col justify-between hover:border-eco-green/40 transition-all group overflow-hidden relative"
+  >
+    <div className="absolute top-0 right-0 w-24 h-24 bg-eco-green/5 blur-3xl -mr-12 -mt-12 group-hover:bg-eco-green/10 transition-colors"></div>
+    <div className="flex justify-between items-start mb-4 relative z-10">
       <div>
-        <p className="text-slate-400 text-sm font-medium mb-1">{title}</p>
-        <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
+        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{title}</p>
+        <h3 className="text-3xl font-black text-white tracking-tighter">{value}</h3>
       </div>
-      <div className="w-12 h-12 rounded-xl bg-slate-800/80 flex items-center justify-center border border-slate-700">
-        <Icon className="text-eco-green w-6 h-6" />
+      <div className="w-12 h-12 rounded-xl bg-slate-800/80 flex items-center justify-center border border-slate-700 group-hover:border-eco-green/50 transition-colors shadow-lg">
+        <Icon className="text-eco-green w-6 h-6 group-hover:scale-110 transition-transform" />
       </div>
     </div>
-    <div className="flex items-center gap-2">
-      <div className={`flex items-center gap-1 text-sm ${trend > 0 ? 'text-eco-green' : 'text-red-400'}`}>
-        <TrendingUp className={`w-4 h-4 ${trend < 0 && 'rotate-180'}`} />
+    <div className="flex items-center gap-2 relative z-10">
+      <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 border ${trend > 0 ? 'text-eco-green border-eco-green/20' : 'text-red-400 border-red-400/20'}`}>
+        <TrendingUp className={`w-3 h-3 ${trend < 0 && 'rotate-180'}`} />
         <span>{Math.abs(trend)}%</span>
       </div>
-      <span className="text-slate-500 text-xs">{subtext}</span>
+      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{subtext}</span>
     </div>
-  </div>
+  </motion.div>
 );
 
 const Dashboard = () => {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
-          <p className="text-slate-400">Real-time e-waste processing and recovery metrics.</p>
-        </div>
-        <button className="bg-eco-green hover:bg-eco-light text-slate-900 px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2">
-          <Activity className="w-4 h-4" /> Generate Report
-        </button>
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/stats');
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center text-slate-400 space-y-4">
+        <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+            <RefreshCcw className="w-12 h-12 text-eco-green" />
+        </motion.div>
+        <p className="font-bold uppercase tracking-widest text-sm animate-pulse">Syncing with Neural Grid...</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <div>
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tighter uppercase italic">Control <span className="text-eco-green">Center</span></h1>
+          <p className="text-slate-400 font-medium">Global AI e-waste processing and material recovery matrix.</p>
+        </div>
+        <div className="flex gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl text-xs font-bold text-slate-300">
+                <Zap className="w-4 h-4 text-yellow-500" /> API Latency: 42ms
+            </div>
+            <button className="bg-eco-green hover:bg-eco-light text-slate-900 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(16,185,129,0.2)] hover:-translate-y-1">
+              <Activity className="w-4 h-4" /> Export Data
+            </button>
+        </div>
+      </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MetricCard title="Total Devices Processed" value="142,509" subtext="vs last month" icon={Server} trend={12.5} />
-        <MetricCard title="Gold Recovered (g)" value="8,405" subtext="vs last month" icon={Coins} trend={4.2} />
-        <MetricCard title="Total Revenue" value="$2.4M" subtext="vs last month" icon={Activity} trend={18.1} />
+        <MetricCard 
+          index={0}
+          title="Total Extraction" 
+          value={stats?.metrics?.totalDevices || "0"} 
+          subtext="vs last month" 
+          icon={Box} 
+          trend={stats?.metrics?.devicesTrend || 0} 
+        />
+        <MetricCard 
+          index={1}
+          title="Gold Recovered (g)" 
+          value={stats?.metrics?.goldRecovered || "0"} 
+          subtext="vs last month" 
+          icon={Coins} 
+          trend={stats?.metrics?.goldTrend || 0} 
+        />
+        <MetricCard 
+          index={2}
+          title="Platform Yield" 
+          value={stats?.metrics?.totalRevenue || "₹0L"} 
+          subtext="vs last month" 
+          icon={TrendingUp} 
+          trend={stats?.metrics?.revenueTrend || 0} 
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        {/* Main Area Chart */}
+        <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-2 glass p-8 rounded-[2rem] relative overflow-hidden"
+        >
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                <Activity className="w-5 h-5 text-eco-green" /> Extraction Velocity
+            </h3>
+            <div className="flex gap-2">
+                <span className="px-3 py-1 bg-eco-green/10 text-eco-green rounded-full text-[10px] font-black uppercase tracking-widest">Monthly Tons</span>
+            </div>
+          </div>
+          
+          <div className="h-[350px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats?.monthlyGeneration || []}>
+                <defs>
+                  <linearGradient id="colorGen" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <XAxis 
+                    dataKey="name" 
+                    stroke="#475569" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fontWeight: 700 }}
+                    dy={10}
+                />
+                <YAxis 
+                    stroke="#475569" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fontWeight: 700 }}
+                    dx={-10}
+                />
+                <RechartsTooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}
+                  itemStyle={{ color: '#10b981', fontWeight: 900 }}
+                  labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                />
+                <Area 
+                    type="monotone" 
+                    dataKey="generation" 
+                    stroke="#10b981" 
+                    strokeWidth={4} 
+                    fillOpacity={1} 
+                    fill="url(#colorGen)" 
+                    animationDuration={2000}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+        {/* Material Composition Pie Chart */}
+        <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="glass p-8 rounded-[2rem] flex flex-col"
+        >
+          <h3 className="text-xl font-black text-white mb-8 tracking-tight flex items-center gap-2">
+            <Server className="w-5 h-5 text-eco-green" /> Recovery Mix
+          </h3>
+          <div className="flex-1 min-h-[300px] relative">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stats?.materialComposition || []}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                  animationDuration={1500}
+                >
+                  {stats?.materialComposition.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <RechartsTooltip 
+                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Efficiency</span>
+                <span className="text-2xl font-black text-white">94%</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            {stats?.materialComposition.map((item: any, idx: number) => (
+                <div key={idx} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill }}></div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter truncate">{item.name}</span>
+                </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div className="glass p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-white mb-6">Yearly E-Waste Generation (Tons)</h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lineData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="year" stroke="#94a3b8" axisLine={false} tickLine={false} />
-                <YAxis stroke="#94a3b8" axisLine={false} tickLine={false} />
-                <RechartsTooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                  itemStyle={{ color: '#10b981' }}
-                />
-                <Line type="monotone" dataKey="generation" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#0f172a', stroke: '#10b981', strokeWidth: 2 }} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
+        {/* Resale vs Recycled Bar Chart */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass p-8 rounded-[2rem]"
+        >
+          <div className="flex justify-between items-center mb-10">
+            <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+                <Box className="w-5 h-5 text-eco-green" /> Path Distribution
+            </h3>
+            <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: '20px' }} />
           </div>
-        </div>
-
-        <div className="glass p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-white mb-6">Resale vs Recycled Devices</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" axisLine={false} tickLine={false} />
-                <YAxis stroke="#94a3b8" axisLine={false} tickLine={false} />
-                <RechartsTooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                  cursor={{ fill: 'rgba(51, 65, 85, 0.2)' }}
+              <BarChart data={stats?.deviceComparison || []}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <XAxis 
+                    dataKey="name" 
+                    stroke="#475569" 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 700 }}
                 />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="resold" name="Resold" fill="#10b981" radius={[4, 4, 0, 0]} barSize={24} />
-                <Bar dataKey="recycled" name="Recycled" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={24} />
+                <YAxis 
+                    stroke="#475569" 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 700 }}
+                />
+                <RechartsTooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                />
+                <Bar dataKey="resold" name="Resold" fill="#10b981" radius={[10, 10, 10, 10]} barSize={20} animationDuration={2000} />
+                <Bar dataKey="recycled" name="Recycled" fill="#3b82f6" radius={[10, 10, 10, 10]} barSize={20} animationDuration={2000} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      </div>
+        </motion.div>
 
-      <div className="glass p-6 rounded-2xl mt-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[100px] pointer-events-none"></div>
-        <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-          <Activity className="text-cyan-400 w-5 h-5" /> 
-          Global Predictive E-Waste Assessment
-        </h3>
-        <FuturisticPredictionMap />
+        {/* Global Predictive Map */}
+        <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+            className="glass p-8 rounded-[2rem] relative overflow-hidden"
+        >
+            <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2 relative z-10">
+            <Activity className="text-cyan-400 w-5 h-5" /> 
+            Predictive Hotspots
+            </h3>
+            <div className="relative z-10 h-[320px]">
+                <FuturisticPredictionMap />
+            </div>
+            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-slate-900 to-transparent pointer-events-none"></div>
+        </motion.div>
       </div>
     </div>
   );

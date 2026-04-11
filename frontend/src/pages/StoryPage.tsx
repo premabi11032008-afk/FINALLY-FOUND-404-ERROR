@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ArrowDown, Cpu, Trash2, ShieldAlert, TrendingUp, DollarSign, Upload, RefreshCcw, CheckCircle } from 'lucide-react';
@@ -19,6 +19,22 @@ const StoryPage = () => {
   const [isClaiming, setIsClaiming] = useState(false);
   const [phone, setPhone] = useState('');
   const [isFinalized, setIsFinalized] = useState(false);
+
+  // Backend stats state
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/stats');
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   // Simulated calculation
   const getEarning = () => {
@@ -70,8 +86,10 @@ const StoryPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="glass p-12 rounded-[2rem] border border-yellow-500/30 relative overflow-hidden group shadow-2xl">
               <div className="absolute -right-20 -top-20 w-64 h-64 bg-yellow-500/10 blur-[80px] rounded-full group-hover:bg-yellow-500/20 transition-all duration-700"></div>
-              <h3 className="text-7xl font-extrabold text-white mb-4">₹52 <span className="text-4xl text-yellow-500">Lakhs</span></h3>
-              <p className="text-2xl font-bold text-slate-200 mb-6">Pure, 24k Gold stripped straight from dead motherboards.</p>
+              <h3 className="text-7xl font-extrabold text-white mb-4">
+                {stats?.metrics?.totalRevenue || "₹24"} <span className="text-4xl text-yellow-500">Revenue</span>
+              </h3>
+              <p className="text-2xl font-bold text-slate-200 mb-6">Recovered directly from community-driven scrap liquidation.</p>
               <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700 shadow-inner">
                 <p className="text-slate-300 text-sm leading-relaxed">
                   <span className="text-yellow-500 font-bold mr-2">☠️ BRUTAL TRUTH:</span>
@@ -82,12 +100,14 @@ const StoryPage = () => {
 
             <div className="glass p-12 rounded-[2rem] border border-eco-green/30 relative overflow-hidden group shadow-2xl">
               <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-eco-green/10 blur-[80px] rounded-full group-hover:bg-eco-green/20 transition-all duration-700"></div>
-              <h3 className="text-7xl font-extrabold text-white mb-4">1.4 <span className="text-4xl text-eco-green">Crore</span></h3>
+              <h3 className="text-7xl font-extrabold text-white mb-4">
+                {stats?.metrics?.totalDevices || "1.4"} <span className="text-4xl text-eco-green">Items</span>
+              </h3>
               <p className="text-2xl font-bold text-slate-200 mb-6">Dead devices ripped apart before they could poison the soil.</p>
               <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-700 shadow-inner">
                 <p className="text-slate-300 text-sm leading-relaxed">
                   <span className="text-eco-green font-bold mr-2">💧 DID YOU KNOW?</span>
-                  A single phone battery can contaminate 60,000 liters of groundwater. We stopped 1.4 Crore of them from reaching your drinking supply.
+                  A single phone battery can contaminate 60,000 liters of groundwater. We stopped over {stats?.metrics?.totalDevices || "1.4 Crore"} of them from reaching your drinking supply.
                 </p>
               </div>
             </div>
@@ -130,14 +150,14 @@ const StoryPage = () => {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
           <button
-            onClick={() => navigate('/dashboard/resale')}
+            onClick={() => navigate('/resale')}
             className="px-10 py-5 bg-white hover:bg-slate-200 text-slate-900 font-black text-xl rounded-2xl transition-all hover:scale-[1.05] active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2"
           >
             EVALUATE YOUR DEVICE <TrendingUp className="w-6 h-6" />
           </button>
 
           <button
-            onClick={() => navigate('/dashboard/contribution')}
+            onClick={() => navigate('/auth')}
             className="px-10 py-5 bg-slate-800 border-2 border-slate-700 hover:border-eco-green/50 text-white font-black text-xl rounded-2xl transition-all hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-2"
           >
             BECOME A PARTNER <Cpu className="w-6 h-6" />
@@ -154,7 +174,7 @@ const StoryPage = () => {
           <p className="text-slate-500 text-sm">
             Want to contribute to the global recovery network?
             <button
-              onClick={() => navigate('/dashboard/contribution')}
+              onClick={() => navigate('/auth')}
               className="text-eco-green hover:text-eco-light ml-2 underline decoration-eco-green/30 underline-offset-4 font-bold transition-colors cursor-pointer"
             >
               Learn how you can join us here.
@@ -178,7 +198,10 @@ const StoryPage = () => {
             Servers gathering dust? We don't do "junk removal". We execute military-grade data destruction and extract massive enterprise-level liquidity from your dead infrastructure.
           </p>
           <div className="pt-4">
-            <button className="flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-10 py-5 rounded-2xl font-black text-lg border border-slate-600 transition-colors shadow-xl group">
+            <button 
+              onClick={() => navigate('/auth')}
+              className="flex items-center gap-3 bg-slate-800 hover:bg-slate-700 text-white px-10 py-5 rounded-2xl font-black text-lg border border-slate-600 transition-colors shadow-xl group"
+            >
               <TrendingUp className="w-6 h-6 text-eco-green group-hover:scale-110 transition-transform" /> COMMAND BULK LIQUIDATION
             </button>
           </div>
@@ -194,18 +217,16 @@ const StoryPage = () => {
           <div className="p-0 bg-slate-900/50">
             <table className="w-full text-left text-lg">
               <tbody>
-                <tr className="border-b border-slate-800 hover:bg-slate-800/80 transition-colors">
-                  <td className="py-6 px-8 text-slate-300 font-bold">Grade A Servers</td>
-                  <td className="py-6 px-8 text-right text-eco-light font-black tracking-tight">₹1.2 Lakhs / ton</td>
-                </tr>
-                <tr className="border-b border-slate-800 hover:bg-slate-800/80 transition-colors">
-                  <td className="py-6 px-8 text-slate-300 font-bold">Industrial Board Mix</td>
-                  <td className="py-6 px-8 text-right text-white font-black tracking-tight">₹45,000 / ton</td>
-                </tr>
-                <tr className="hover:bg-slate-800/80 transition-colors">
-                  <td className="py-6 px-8 text-slate-300 font-bold">Raw Li-ion Banks</td>
-                  <td className="py-6 px-8 text-right text-white font-black tracking-tight">₹22,000 / ton</td>
-                </tr>
+                {(stats?.b2bCommodities || [
+                  { name: "Grade A Servers", price: "₹1.2 Lakhs / ton" },
+                  { name: "Industrial Board Mix", price: "₹45,000 / ton" },
+                  { name: "Raw Li-ion Banks", price: "₹22,000 / ton" }
+                ]).map((commodity: any, idx: number) => (
+                  <tr key={idx} className={`border-slate-800 hover:bg-slate-800/80 transition-colors ${idx !== 2 ? 'border-b' : ''}`}>
+                    <td className="py-6 px-8 text-slate-300 font-bold">{commodity.name}</td>
+                    <td className="py-6 px-8 text-right text-eco-light font-black tracking-tight">{commodity.price}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -220,7 +241,7 @@ const StoryPage = () => {
     <div className="max-w-5xl mx-auto">
       <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter uppercase drop-shadow-md">Become A Strategic Partner.<br />Process Global E-Waste.</h2>
       <p className="text-2xl font-bold mb-12 max-w-3xl mx-auto text-slate-800 leading-relaxed">
-        Connect your recycling and refurbishing facilities directly with our AI engine. We route high-value, pre-evaluated corporate and consumer e-waste straight to your loading docks.
+        Connect your recycling and refurbishing facilities directly with our AI engine. We route over {stats?.metrics?.goldRecovered || "8,400"}g of high-value, pre-evaluated corporate and consumer e-waste straight to your loading docks.
       </p>
       <button onClick={() => navigate('/auth')} className="bg-slate-900 hover:bg-black text-white px-12 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center gap-4 mx-auto">
         ACCESS PARTNER PORTAL
