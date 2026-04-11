@@ -49,10 +49,25 @@ const StoryPage = () => {
   };
 
   return (
-    <div className="bg-eco-darker min-h-screen text-slate-200 selection:bg-eco-green selection:text-slate-900 font-sans">
+    <div className="min-h-screen text-slate-200 selection:bg-eco-green selection:text-slate-900 font-sans relative">
+
+      {/* Persistent Global Video Background (Hidden during Hero) */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline 
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/impact-video.mp4" type="video/mp4" />
+        </video>
+        {/* Dark Readability Overlay for Fixed Video */}
+        <div className="absolute inset-0 bg-black/70"></div>
+      </div>
 
       {/* Act 1: The Hook */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden z-20 bg-eco-darker">
         {/* Live ML-powered world map: pointer-events-none, never blocks text */}
         <WorldPredictionBackground />
 
@@ -76,7 +91,7 @@ const StoryPage = () => {
       </section>
 
       {/* Act 2: Relatable Impact Metrics */}
-      <section className="py-32 px-4 relative z-20">
+      <section className="py-32 px-4 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-24">
             <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6">This isn't charity.<br />This is an industrial revolution.</h2>
@@ -116,7 +131,7 @@ const StoryPage = () => {
       </section>
 
       {/* Act 3: The Catalyst (Interactive Evaluator) */}
-      <section id="evaluator" className="py-32 px-4 bg-slate-900/80 border-y border-slate-800 relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      <section id="evaluator" className="py-32 px-4 relative z-10 border-y border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
         <div className="max-w-4xl mx-auto text-center space-y-12">
 
           <div className="space-y-4">
@@ -129,7 +144,7 @@ const StoryPage = () => {
           {/* Main CTA Section */}
           <div className="relative group p-1">
             <div className="absolute -inset-1 bg-gradient-to-r from-eco-green/50 to-blue-500/50 rounded-[40px] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-            <div className="relative bg-slate-900 border border-slate-800 rounded-[40px] p-12 text-center overflow-hidden">
+            <div className="relative bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-[40px] p-12 text-center overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-eco-green/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -ml-32 -mb-32"></div>
               
@@ -188,7 +203,7 @@ const StoryPage = () => {
       </section >
 
   {/* Act 4: Scale (Business / Scrap UI minimized) */ }
-  < section className = "py-32 px-4 relative z-20" >
+  < section className = "py-32 px-4 relative z-10" >
     <div className="max-w-6xl mx-auto">
       <div className="flex flex-col lg:flex-row gap-16 items-center">
 
@@ -208,7 +223,7 @@ const StoryPage = () => {
         </div>
 
         <div className="flex-1 w-full glass rounded-3xl overflow-hidden border-2 border-slate-700/50 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-          <div className="bg-slate-900 p-6 border-b border-slate-800 flex justify-between items-center">
+          <div className="bg-slate-900/60 backdrop-blur-md p-6 border-b border-slate-800 flex justify-between items-center">
             <span className="font-black text-white text-sm uppercase tracking-widest">B2B Live Commodities</span>
             <span className="flex items-center gap-2 text-xs text-eco-darker px-3 py-1.5 bg-eco-green rounded-full font-black uppercase tracking-wider animate-pulse">
               <DollarSign className="w-3 h-3" /> Trading Live
