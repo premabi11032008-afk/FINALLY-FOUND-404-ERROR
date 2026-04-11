@@ -1,22 +1,32 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
+import cv2
+import numpy as np
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import joblib
 import os
 import sys
+from typing import List
 
 # Add parent directory to path so we can import get_prediction_from_model
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, parent_dir)
 
 from get_prediction_from_model import predictions
+from yolo_detection import analyze_image, get_valuation
+from gemini_verification import verify_with_gemini
+
+# Load env for Gemini key if available
+from dotenv import load_dotenv
+load_dotenv(os.path.join(parent_dir, 'frontend', '.env'))
+GEMINI_API_KEY = os.getenv("VITE_GEMINI_API_KEY")
 
 app = FastAPI()
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,7 +56,6 @@ def predict(month: int, year: int):
     
     try:
         pred_df = predictions(DATASET, month, year, MODEL)
-        
         pred_df = pred_df.sort_values(by="Predicted_Total_Next_Month", ascending=False)
         top_2_regions = pred_df.head(2)["Region"].tolist()
         
@@ -67,4 +76,115 @@ def predict(month: int, year: int):
             "top_regions": top_2_regions
         }
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/evaluate")
+async def evaluate_device(files: List[UploadFile] = File(...)):
+    try:
+        results_list = []
+        for file in files:
+            contents = await file.read()
+            nparr = np.frombuffer(contents, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            if img is None:
+                continue
+                
+            rating, condition, recommendation, damage_percent, detections = analyze_image(img)
+            
+            # Check if YOLO detected a phone (67) or laptop (63)
+            is_verified = any(d['class_id'] in [63, 67] and d['confidence'] > 0.4 for d in detections)
+            device_type = next((d['class_name'] for d in detections if d['class_id'] in [63, 67]), "unknown")
+            
+            # FALLBACK TO GEMINI if YOLO is unsure
+            if not is_verified and GEMINI_API_KEY:
+                print(f"YOLO unsure about {file.filename}. Falling back to Gemini...")
+                # We use the raw bytes for Gemini
+                gemini_verified, gemini_type, gemini_cond = verify_with_gemini(contents, GEMINI_API_KEY)
+                if gemini_verified:
+                    print(f"Gemini verified: {gemini_type}")
+                    is_verified = True
+                    device_type = gemini_type
+            
+            price = get_valuation(rating)
+            results_list.append({
+                "rating": rating,
+                "condition": condition,
+                "recommendation": recommendation,
+                "damage_percent": round(damage_percent, 2),
+                "price": f"₹{price:,}",
+                "raw_price": price,
+                "is_verified": is_verified,
+                "device_type": device_type
+            })
+        
+        if not results_list:
+            raise HTTPException(status_code=400, detail="No valid images provided")
+            
+        # Return the most conservative (lowest rating) result that is verified
+        verified_results = [r for r in results_list if r['is_verified']]
+        if not verified_results:
+            return results_list[0] # Return one unverified result for feedback
+            
+        return min(verified_results, key=lambda x: x['rating'])
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/order")
+async def place_order(order_data: dict):
+    phone = order_data.get("phone")
+    if not phone:
+        raise HTTPException(status_code=400, detail="Phone number required")
+    
+# Chat endpoint
+@app.post("/api/chat")
+async def chat_with_ai(chat_data: dict):
+    if not GEMINI_API_KEY:
+        raise HTTPException(status_code=500, detail="Gemini API Key not configured")
+    
+    user_msg = chat_data.get("message")
+    history = chat_data.get("history", []) # List of {role, parts: [{text}]}
+    
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=GEMINI_API_KEY)
+        
+        system_instruction = """
+        You are "Re-Cover AI", an intelligent assistant for the Re-Cover platform.
+        Our mission is to combat e-waste. Every phone and laptop is a "toxic fortune".
+        If a user wants to check their device value or recycle, use the 'evaluate_device_redirect' tool.
+        Encourage users to liquidize their hardware for instant INR payouts.
+        """
+        
+        model = genai.GenerativeModel(
+            model_name='gemini-1.5-flash',
+            system_instruction=system_instruction,
+            tools=[{
+                "function_declarations": [{
+                    "name": "evaluate_device_redirect",
+                    "description": "Guides the user to the device evaluation page when they want to check their phone/laptop value or recycle."
+                }]
+            }]
+        )
+        
+        # Format history for Gemini SDK
+        # Gemini expects 'user' and 'model' (not 'assistant')
+        chat = model.start_chat(history=history)
+        response = chat.send_message(user_msg)
+        
+        # Check for function calls
+        res_data = {"text": response.text, "redirect": False}
+        
+        # If there's a function call, we signal the frontend to redirect
+        for part in response.candidates[0].content.parts:
+            if part.function_call:
+                if part.function_call.name == "evaluate_device_redirect":
+                    res_data["redirect"] = True
+                    res_data["text"] = "I am redirecting you to our AI Assessment Matrix right now! You can upload your photos there to get an instant payout."
+        
+        return res_data
+
+    except Exception as e:
+        print(f"Chat Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

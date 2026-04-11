@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot, User, ArrowDownCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SYSTEM_PROMPT = `You are "Re-Cover AI", an intelligent assistant for the Re-Cover platform (formerly EcoMine AI). 
-Our motive is to combat the silent crisis of e-waste (electronic waste). We educate users that their old tech (phones, laptops) holds a "toxic fortune" — they contain precious metals like gold and lithium, but also leak neurotoxins into landfills if discarded improperly.
-Your goal is to be helpful, informative, and to occasionally encourage users to recycle or extract value from their old devices.
-If the user expresses interest in cleaning the earth, recycling, seeing how much their device is worth, or taking action, you MUST use the "scroll_to_evaluator" tool to scroll their screen to the interactive device evaluator widget where they can begin.`;
+const SYSTEM_PROMPT = `You are "Re-Cover AI", an intelligent assistant for the Re-Cover platform. 
+Our mission is to combat e-waste. We educate users that old tech holds a "toxic fortune".
+If a user wants to check their device value or recycle, use the 'evaluate_device_redirect' tool to send them to the AI Assessment Matrix page.
+Encourage users to liquidize their hardware for instant INR payouts.`;
+
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   role: 'user' | 'model';
@@ -13,6 +15,7 @@ interface Message {
 }
 
 const ChatbotBubble: React.FC = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'model', text: 'Hello! I am the Re-Cover AI. How can I help you extract value from your old devices today?' }
@@ -36,62 +39,30 @@ const ChatbotBubble: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // In a real app we'd proxy this through our backend to hide the key, 
-      // but for this hackathon we use VITE_GEMINI_API_KEY from the environment
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) {
-        setMessages(prev => [...prev, { role: 'model', text: 'Error: VITE_GEMINI_API_KEY is not set in your frontend .env file!' }]);
-        setIsLoading(false);
-        return;
-      }
-
-      const payload = {
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [
-          ...messages.filter(m => m.text).map(m => ({
-            role: m.role,
-            parts: [{ text: m.text }]
-          })),
-          { role: 'user', parts: [{ text: userMsg }] }
-        ],
-        tools: [{
-          functionDeclarations: [{
-            name: 'scroll_to_evaluator',
-            description: 'Scroll the user screen to the actionable device evaluator widget when they indicate interest in recycling, extracting value from old tech, or cleaning the earth.'
-          }]
-        }]
-      };
-
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      // Backend handles the Gemini key and logic securely
+      const response = await fetch('http://127.0.0.1:8000/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          message: userMsg,
+          history: messages.map(m => ({
+            role: m.role,
+            parts: [{ text: m.text }]
+          }))
+        })
       });
 
-      const data = await res.json();
+      if (!response.ok) throw new Error('Failed to chat');
       
-      if (data.error) {
-        console.error(data.error);
-        setMessages(prev => [...prev, { role: 'model', text: 'Sorry, I encountered an API error.' }]);
-        return;
-      }
+      const data = await response.json();
+      
+      setMessages(prev => [...prev, { role: 'model', text: data.text }]);
 
-      const candidate = data.candidates?.[0]?.content?.parts?.[0];
-      
-      // Check if LLM decided to call our tool
-      if (candidate?.functionCall) {
-        if (candidate.functionCall.name === 'scroll_to_evaluator') {
-          // LLM used the tool! Execute the client-side scrolling.
-          const evalSection = document.getElementById('evaluator');
-          if (evalSection) {
-            evalSection.scrollIntoView({ behavior: 'smooth' });
-            setMessages(prev => [...prev, { role: 'model', text: 'I am scrolling you to our extraction widget right now! Let me know if you need any help with it.' }]);
-          } else {
-             setMessages(prev => [...prev, { role: 'model', text: 'The evaluator widget seems to represent a page section we cannot currently scroll to, but you can find it scrolling down!' }]);
-          }
-        }
-      } else if (candidate?.text) {
-        setMessages(prev => [...prev, { role: 'model', text: candidate.text }]);
+      if (data.redirect) {
+        // AI used the navigation tool
+        setTimeout(() => {
+          navigate('/dashboard/resale');
+        }, 1500);
       }
 
     } catch (err) {
