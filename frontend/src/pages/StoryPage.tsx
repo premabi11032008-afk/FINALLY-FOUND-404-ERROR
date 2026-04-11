@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowDown, Cpu, Trash2, ShieldAlert, TrendingUp, DollarSign } from 'lucide-react';
 import WorldPredictionBackground from '../components/WorldPredictionBackground';
 
 const StoryPage = () => {
-  const [device, setDevice] = useState('Smartphone');
+  const navigate = useNavigate();
+  const [device, setDevice] = useState('Servers');
   const [condition, setCondition] = useState(50);
   const [showResult, setShowResult] = useState(false);
 
   // Simulated calculation
   const getEarning = () => {
-    if (device === 'Smartphone') return condition > 50 ? '₹18,500' : '₹4,200';
-    if (device === 'Laptop') return condition > 50 ? '₹55,000' : '₹14,000';
-    return '₹5,000';
+    const base = device === 'Servers' ? 120000 : 45000;
+    const total = base * condition;
+    return `₹${(total / 100000).toFixed(1)} Lakhs`;
   };
 
   const getImpact = () => {
-    if (device === 'Smartphone') return 'locked away 12g of neurotoxic lead and choked off 5kg of raw carbon emissions';
-    if (device === 'Laptop') return 'rescued highly-volatile lithium and stopped 25kg of toxic atmospheric waste';
-    return 'become an active agent in extreme environmental recovery';
+    if (device === 'Servers') return `routed ${condition} tons of enterprise infrastructure to deep-recycling partners`;
+    return `injected ${condition} tons of raw industrial materials back into the manufacturing grid`;
   };
 
   return (
@@ -89,9 +90,9 @@ const StoryPage = () => {
           
           <div className="space-y-4">
             <h2 className="text-4xl md:text-6xl font-black text-white leading-tight">
-               Don't let it rot. Liquidate it.
+               Bulk Liquidation Engine.
             </h2>
-            <p className="text-xl text-slate-400">Extract your payout in 3 seconds.</p>
+            <p className="text-xl text-slate-400">Calculate enterprise-grade scrap value in 3 seconds.</p>
           </div>
 
           <div className="glass p-8 md:p-12 rounded-[2rem] text-left border border-slate-700">
@@ -99,39 +100,39 @@ const StoryPage = () => {
               
               <div className="space-y-8">
                 <div>
-                  <label className="block text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-800 pb-2">I am holding a...</label>
+                  <label className="block text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-800 pb-2">Commodity Category...</label>
                   <div className="flex gap-4">
                     <button 
-                      onClick={() => { setDevice('Smartphone'); setShowResult(false); }}
-                      className={`flex-1 py-4 rounded-xl border-2 font-black transition-all ${device === 'Smartphone' ? 'border-eco-green bg-eco-green/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-slate-700 text-slate-400 hover:border-slate-500 bg-slate-800/50'}`}
+                      onClick={() => { setDevice('Servers'); setShowResult(false); }}
+                      className={`flex-1 py-4 rounded-xl border-2 font-black transition-all ${device === 'Servers' ? 'border-eco-green bg-eco-green/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-slate-700 text-slate-400 hover:border-slate-500 bg-slate-800/50'}`}
                     >
-                      PHONE
+                      SERVERS / WORKSTATIONS
                     </button>
                     <button 
-                      onClick={() => { setDevice('Laptop'); setShowResult(false); }}
-                      className={`flex-1 py-4 rounded-xl border-2 font-black transition-all ${device === 'Laptop' ? 'border-eco-green bg-eco-green/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-slate-700 text-slate-400 hover:border-slate-500 bg-slate-800/50'}`}
+                      onClick={() => { setDevice('Boards'); setShowResult(false); }}
+                      className={`flex-1 py-4 rounded-xl border-2 font-black transition-all ${device === 'Boards' ? 'border-eco-green bg-eco-green/10 text-white shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'border-slate-700 text-slate-400 hover:border-slate-500 bg-slate-800/50'}`}
                     >
-                      LAPTOP
+                      MIXED MOTHERBOARDS
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-800 pb-2 flex justify-between items-end">
-                    <span>It looks like...</span>
-                    <span className={`text-lg font-black ${condition > 80 ? 'text-eco-light' : condition > 40 ? 'text-yellow-500' : 'text-red-500'}`}>
-                      {condition > 80 ? 'FLAWLESS' : condition > 40 ? 'BEATEN BUT BREATHING' : 'SHATTERED & DEAD'}
+                    <span>Estimated Volume...</span>
+                    <span className="text-lg font-black text-yellow-500">
+                      {condition} TONS
                     </span>
                   </label>
                   <input 
-                    type="range" min="0" max="100" 
+                    type="range" min="1" max="100" 
                     value={condition} 
                     onChange={(e) => { setCondition(parseInt(e.target.value)); setShowResult(false); }}
                     className="w-full h-4 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-eco-green border border-slate-700" 
                   />
                   <div className="flex justify-between text-xs font-bold text-slate-600 mt-3 uppercase tracking-wider">
-                    <span>Obliterated</span>
-                    <span>Pristine</span>
+                    <span>1 Ton</span>
+                    <span>100+ Tons</span>
                   </div>
                 </div>
 
@@ -139,7 +140,7 @@ const StoryPage = () => {
                   onClick={() => setShowResult(true)}
                   className="w-full bg-white hover:bg-slate-200 text-slate-900 font-black text-xl py-5 rounded-xl transition-transform hover:scale-[1.02] active:scale-95 shadow-2xl"
                 >
-                  EXTRACT VALUE NOW
+                  CALCULATE BATCH VALUE
                 </button>
               </div>
 
@@ -148,21 +149,21 @@ const StoryPage = () => {
                   <div className="h-full flex flex-col justify-center bg-eco-green/10 border-2 border-eco-green shadow-[0_0_30px_rgba(16,185,129,0.2)] rounded-3xl p-8 animate-in fade-in zoom-in duration-500 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full z-0 pointer-events-none"></div>
                     <div className="relative z-10">
-                      <p className="text-white font-black uppercase tracking-widest text-sm mb-2 opacity-80">Immediate Cashout</p>
+                      <p className="text-white font-black uppercase tracking-widest text-sm mb-2 opacity-80">B2B Liquidity Estimate</p>
                       <h4 className="text-6xl font-black text-white mb-6 tracking-tighter drop-shadow-lg">{getEarning()}</h4>
                       <div className="h-px w-full bg-eco-green/30 mb-6"></div>
                       <p className="text-slate-300 text-lg font-medium leading-relaxed mb-10">
-                        Cash in your pocket today. More importantly? You just <strong className="text-eco-light font-bold">{getImpact()}</strong>.
+                        Immediate capital injection available. More importantly? You just <strong className="text-eco-light font-bold">{getImpact()}</strong>.
                       </p>
-                      <button className="w-full bg-eco-green hover:bg-eco-light text-slate-900 font-black text-xl py-5 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_rgba(16,185,129,0.8)] hover:-translate-y-1">
-                        CLAIM IT & SAVE THE WORLD
+                      <button onClick={() => navigate('/auth')} className="w-full bg-eco-green hover:bg-eco-light text-slate-900 font-black text-xl py-5 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_40px_rgba(16,185,129,0.8)] hover:-translate-y-1">
+                        LIST BATCH FOR PARTNERS
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="h-full flex flex-col justify-center items-center text-slate-600 border-2 border-dashed border-slate-700 rounded-3xl p-8 bg-slate-900/50 min-h-[350px]">
-                    <Trash2 className="w-20 h-20 mb-6 opacity-40 animate-pulse" />
-                    <p className="text-center font-bold text-lg max-w-[200px]">Hit Extract to run the valuation matrix.</p>
+                    <TrendingUp className="w-20 h-20 mb-6 opacity-40 animate-pulse" />
+                    <p className="text-center font-bold text-lg max-w-[200px]">Hit Calculate to run the valuation matrix.</p>
                   </div>
                 )}
               </div>
@@ -221,10 +222,15 @@ const StoryPage = () => {
 
       {/* Footer CTA */}
       <footer className="py-32 px-4 bg-eco-green text-slate-900 text-center relative z-20 border-t-8 border-eco-light">
-        <h2 className="text-5xl md:text-7xl font-black mb-12 tracking-tighter uppercase drop-shadow-md">Stop hoarding trash.<br/>Start funding the future.</h2>
-        <button className="bg-slate-900 hover:bg-black text-white px-12 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
-           IGNITE THE REVOLUTION
-        </button>
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter uppercase drop-shadow-md">Become A Strategic Partner.<br/>Process Global E-Waste.</h2>
+          <p className="text-2xl font-bold mb-12 max-w-3xl mx-auto text-slate-800 leading-relaxed">
+            Connect your recycling and refurbishing facilities directly with our AI engine. We route high-value, pre-evaluated corporate and consumer e-waste straight to your loading docks.
+          </p>
+          <button onClick={() => navigate('/auth')} className="bg-slate-900 hover:bg-black text-white px-12 py-6 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6)] flex items-center justify-center gap-4 mx-auto">
+             ACCESS PARTNER PORTAL
+          </button>
+        </div>
       </footer>
 
     </div>
