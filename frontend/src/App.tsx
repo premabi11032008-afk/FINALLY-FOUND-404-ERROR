@@ -32,19 +32,15 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<StoryPage />} />
-<<<<<<< HEAD
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/dashboard" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="resale" element={<ResaleExchange />} />
           <Route path="scrap" element={<ScrapRecovery />} />
+          <Route path="contribution" element={<ContributionPage />} />
         </Route>
-=======
-        <Route path="/dashboard/resale" element={<ResaleExchange />} />
-        <Route path="/dashboard/contribution" element={<ContributionPage />} />
         {/* Fallback to home */}
         <Route path="*" element={<StoryPage />} />
->>>>>>> e59e4c0a26ec15e8462fbc6474ac1373fac69f56
       </Routes >
     <ChatbotBubble />
     </BrowserRouter >
