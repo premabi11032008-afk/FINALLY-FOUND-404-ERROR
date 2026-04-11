@@ -82,25 +82,25 @@ def analyze_image(image):
 def get_valuation(rating):
     """
     Returns a simple valuation based on rating (0-10).
-    Max value is 80,000 INR.
+    Max value is 30,000 INR.
     """
-    # Simple linear or stepped pricing
+    # Adjusted price tiers to 30k cap
     if rating >= 9:
-        price = 80000
+        price = 30000
     elif rating >= 7:
-        price = 45000
+        price = 15000
     elif rating >= 5:
-        price = 25000
+        price = 5000
     elif rating >= 3:
-        price = 8000
+        price = 1000
     else:
-        price = 1500
+        price = 500
         
-    # Add a bit of "random demand" variance (e.g. +/- 10%)
+    # Add a bit of "random demand" variance (e.g. +/- 500)
     variance = np.random.randint(-500, 500)
     return max(0, price + variance)
 
 if __name__ == "__main__":
     # Test block
     print("Testing YOLO Model Refactor...")
-    # Add manual test if needed
+    # Add manual test if needed
