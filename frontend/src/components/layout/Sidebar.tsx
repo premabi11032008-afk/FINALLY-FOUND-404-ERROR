@@ -28,19 +28,7 @@ const Sidebar = () => {
           <span className="font-medium">Analytics</span>
         </NavLink>
 
-        <NavLink
-          to="/dashboard/resale"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-              isActive
-                ? 'bg-eco-green/20 text-eco-light border border-eco-green/30'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`
-          }
-        >
-          <Smartphone className="w-5 h-5" />
-          <span className="font-medium">Resale & Exchange</span>
-        </NavLink>
+
 
         <NavLink
           to="/dashboard/scrap"

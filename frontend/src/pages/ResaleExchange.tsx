@@ -96,8 +96,11 @@ const ResaleExchange = () => {
     }
   };
 
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  
   const handlePlaceOrder = async () => {
     if (!phoneNumber) { alert("Please enter your phone number"); return; }
+    setIsPlacingOrder(true);
     try {
       const response = await fetch('http://127.0.0.1:8000/api/order', {
         method: 'POST',
@@ -109,10 +112,17 @@ const ResaleExchange = () => {
           type: result.deviceType
         }),
       });
+      
+      if (!response.ok) throw new Error("Server error");
+      
       const data = await response.json();
-      setOrderResponse(data);
+      setOrderResponse(data || { message: "Order processed successfully." });
       setOrderStep('finalized');
-    } catch (error) { alert("Order failed."); }
+    } catch (error) { 
+      alert("Order failed. Please check your connection."); 
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   return (
@@ -301,9 +311,14 @@ const ResaleExchange = () => {
                     />
                     <button 
                       onClick={handlePlaceOrder}
-                      className="w-full bg-white text-slate-900 font-black py-6 rounded-2xl hover:bg-slate-200 transition-all text-xl shadow-2xl"
+                      disabled={isPlacingOrder}
+                      className="w-full bg-white text-slate-900 font-black py-6 rounded-2xl hover:bg-slate-200 transition-all text-xl shadow-2xl flex items-center justify-center gap-2"
                     >
-                      EXECUTE PROTOCOL
+                      {isPlacingOrder ? (
+                        <><RefreshCcw className="w-6 h-6 animate-spin" /> EXECUTING...</>
+                      ) : (
+                        "EXECUTE PROTOCOL"
+                      )}
                     </button>
                   </div>
                 )}
@@ -314,7 +329,7 @@ const ResaleExchange = () => {
                         <div className="absolute inset-0 bg-eco-green/40 blur-3xl"></div>
                         <CheckCircle className="w-24 h-24 text-eco-green mx-auto relative z-10" />
                     </div>
-                    <h4 className="text-3xl font-black text-white uppercase tracking-tighter">SUCCESS</h4>
+                    <h4 className="text-3xl font-black text-white uppercase tracking-tighter">PROTOCOL INITIATED</h4>
                     <p className="text-slate-400 font-medium leading-relaxed px-4">{orderResponse.message}</p>
                     <div className="bg-black/60 p-5 rounded-2xl border border-slate-800 font-mono text-[10px] text-eco-green/80 flex items-center justify-between">
                        <span>TRANSACTION_HASH</span>

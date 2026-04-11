@@ -1,35 +1,35 @@
 # Re-Cover AI 2.0 — PROJECT NOTES
-## Last updated: 2026-04-10 (Night Session)
+## Last updated: 2026-04-11 (Morning Session)
 
 ## 🏗️ Architecture Upgrade
-- **Landing Page Separation**: The StoryPage (Landing) is now focused on the high-level narrative and mission. All complex assessment logic has been moved to a dedicated, high-performance dashboard.
-- **Routing**: Implemented `react-router-dom` in `App.tsx`.
+- **Route Decoupling**: The "Resale & Exchange" (AI Assessment Matrix) has been decoupled from the Partner Dashboard.
   - `/` -> Mission-driven StoryPage.
-  - `/dashboard/resale` -> AI Assessment Matrix tool.
-  - `/dashboard/contribution` -> Partner Network portal (Coming Soon).
+  - `/resale` -> Standalone AI Assessment Matrix for consumer liquidity.
+  - `/dashboard` -> Secure Partner Analytics & Scrap Recovery Hub.
+- **Unified Auth**: All "Become a Partner" and "Bulk Liquidation" entry points now funnel through the central `/auth` portal.
 
 ## 🧠 Hybrid AI Evaluation Engine
-Moved the evaluator to a dedicated page with three-tier verification:
-1. **YOLOv8 Assessment**: Detects devices (Cell Phone/Laptop) and identifies structural damage using object detection and Canny edge quantification.
-2. **Gemini 1.5 Vision Fallback**: If YOLO is uncertain, the system automatically triggers Gemini Vision to verify the device type and assess physical condition.
-3. **Human Confidence Slider**: Added a 5-stage slider (Scrapped to Mint) allowing users to guide the AI, ensuring fair valuations and preventing misleading conservative estimates.
+- **Dedicated Presence**: Moved the evaluator to a distraction-free top-level page (`/resale`).
+- **Conservative Pricing**: Multi-angle analysis identifies the most damaged view to ensure risk-free platform assessments.
+- **Verification Stack**: YOLOv8 device detection + Gemini 1.5 Vision fallback + Human-in-the-loop confidence slider.
 
-## 📸 Multi-Angle Analysis
-- **Photo Gallery**: Added support for appending multiple images (front, back, sides) sequentially.
-- **Conservative Pricing**: The system analyzes all uploaded photos and calculates the valuation based on the most damaged view to ensure risk-free platform estimates.
-- **Dynamic Reset**: If all photos are removed, the AI result matrix resets to default "Awaiting" status.
+## 📊 Visual Intelligence (New)
+- **Real-time Synchronization**: Frontend now fetches dynamic metrics from the backend `/api/stats` endpoint.
+- **Impact Tracking**:
+  - **Extraction Velocity**: Monthly area charts tracking e-waste processing in Tons.
+  - **Recovery Mix**: Donut chart visualizing composition metrics (Gold, Copper, Plastic, Rare Earths).
+  - **Path Distribution**: Comparative bar charts for Resale vs Recycling volumes.
+- **Predictive Mapping**: Interactive Hotspot map showing regional e-waste generation projections.
 
-## 💬 Re-Cover Intelligent Assistant (Chatbot)
-- **Backend Migration**: Moved the Gemini API logic to the FastAPI backend (`/api/chat`) to secure API keys.
-- **Tool-Aware AI**: The chatbot uses Gemini 1.5 Flash with function calling support.
-- **Navigation Integration**: If a user asks to recycle or check their device value, the chatbot triggers a `navigate` event to redirect them automatically to the assessment matrix.
+## 💬 Intelligent Assistant Integration
+- **Context-Aware Navigation**: Chatbot can now trigger automatic redirects to the standalone `/resale` page when users inquire about device value.
+- **Backend Security**: Gemini API transactions are processed server-side to prevent client-side key exposure.
 
 ## 🛠️ Tech Stack Refinement
-- **Frontend**: React 19, Vite, Tailwind CSS v4, Lucide Icons, Framer Motion, React Router.
-- **Backend**: FastAPI, Ultralytics (YOLOv8), Gemini 1.5 Flash/Vision, Python-Dotenv, Pillow.
-- **AI Models**: YOLOv8n, Gemini 1.5 Flash (via Backend SDK).
+- **Frontend**: React 19, Vite, Tailwind CSS v4, Lucide Icons, Framer Motion, Recharts.
+- **Backend**: FastAPI, Ultralytics (YOLOv8), Gemini 1.5 SDK, Pandas (Dataset Processing).
 
 ## 🚀 To Start the App
 1. **Frontend**: `cd frontend && npm run dev`
 2. **Backend**: `cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000`
-   - *Ensure .env contains VITE_GEMINI_API_KEY in the frontend folder.*
+

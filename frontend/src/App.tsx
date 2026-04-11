@@ -33,9 +33,9 @@ function App() {
       <Routes>
         <Route path="/" element={<StoryPage />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/resale" element={<ResaleExchange />} />
         <Route path="/dashboard" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="resale" element={<ResaleExchange />} />
           <Route path="scrap" element={<ScrapRecovery />} />
           <Route path="contribution" element={<ContributionPage />} />
         </Route>
